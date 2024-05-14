@@ -4,103 +4,44 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { Box, TextField, Typography } from "@mui/material";
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 class MainDateTimeInput extends React.Component {
     constructor(props) {
         super(props)
-        this.state = {
-            sxParams: {
-                '& label.Mui-focused': {
-                    color: this.props.colors.blueAccent[400],
-                },
-                '& label': {
-                    color: this.props.colors.grey[1100],
-                },
-                '& .MuiInput-underline:after': {
-                    borderBottomColor: this.props.colors.blueAccent[400],
-                },
-                '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                        borderColor: this.props.colors.grey[1100],
-                    },
-                    '&.Mui-focused fieldset': {
-                        borderColor: this.props.colors.blueAccent[400],
-                    },
-                },
-            }
-        }
+        this.state = { wrongFormat: false }
     }
 
-    componentWillMount() {
-        var css = this.state.sxParams
+    handleChange(event) {
         if (this.props.type === 'time') {
-            if (this.props.borderless) {
-                css = Object.assign({},
-                    {
-                        '& .MuiInput-root': {
-                            borderBottom: `0.5px solid ${this.props.colors.grey[1100]}`,
-                            color: this.props.colors.grey[100],
-                            padding: '1px 2px',
-                            fontSize: '14px',
-                            marginRight: '20px'
-                        },
-                        '& .MuiInput-input': {
-                            padding: '0'
-                        },
-                        width: this.props.fullWidth ? '93%' : '90%',
-                    },
-                    css)
-            } else {
-                css = Object.assign({},
-                    {
-                        input: {
-                            color: this.props.colors.grey[100]
-                        },
-                        '& .MuiInputBase-input.Mui-disabled': {
-                            WebkitTextFillColor: this.props.colors.grey[100],
-                            opacity: 0.7
-                        },
-                        label: {
-                            "&.Mui-disabled": {
-                                color: this.props.colors.grey[1100]
-                            }
-                        },
-                        width: this.props.width ? this.props.width : this.props.fullWidth ? '97%' : '94%'
-                    },
-                    css)
+            const input = event.target.value
+
+            let cleanedInput = input.replace(/[^\d]/g, '').substring(0, 4)
+
+            if (cleanedInput.length >= 3) {
+                cleanedInput = cleanedInput.substring(0, 2) + ':' + cleanedInput.substring(2, 4)
             }
-        }
+            event.target.value = cleanedInput
 
-        this.setState({
-            sxParams: css
-        })
-    }
-
-    handleChange = (event) => {
-        if (this.props.type === 'time') {
-            const timeRegex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/
-
-            if (!event.target.value || timeRegex.test(event.target.value)) {
-                this.setState({ errorMessage: '' })
+            if (event.target.value.length !== 5 && event.target.value.length !== 0) {
+                this.setState({ wrongFormat: true })
             } else {
-                this.setState({ errorMessage: 'Hora Incorreta' })
+                this.setState({ wrongFormat: false })
             }
-
             this.props.handleChange(event)
         }
     }
 
     handleChangeDate = (date) => {
         var formattedDate
-        if (this.props.onlyDate === true) {                                                  // caso o campo esteja como "date" no banco
-            formattedDate = date ? dayjs(date).format('YYYY-MM-DD') : '';
-        } else {                                                                    // caso o campo esteja como "datetime" no banco
+        if (this.props.onlyDate === true) {                                 // caso o campo esteja como "date" no banco
+            formattedDate = date ? dayjs(date).format('YYYY-MM-DD') : ''
+        } else {                                                            // caso o campo esteja como "datetime" no banco
             formattedDate = date
         }
         const event = {
@@ -117,7 +58,7 @@ class MainDateTimeInput extends React.Component {
         if (this.props.type === 'time') {
             return (
                 <>
-                    <Typography sx={{ fontSize: '13px' }}>
+                    <Typography sx={{ fontSize: '13px', color: this.state.wrongFormat ? 'red' : '' }}>
                         {this.props.required
                             ? <>{this.props.label}<span style={{ color: this.props.colors.redAccent[600] }}> *</span></> ?? ''
                             : this.props.label ?? ''
@@ -154,13 +95,9 @@ class MainDateTimeInput extends React.Component {
                                     borderColor: this.props.colors.grey[500], // Cor da borda quando está selecionado
                                 },
                             },
-                            input: {
-                                color: this.props.colors.grey[200],
-                            },
                             label: {
                                 "&.Mui-disabled": {
                                     color: this.props.colors.grey[1100],
-
                                 }
                             },
                             width: this.props.width ? this.props.width : this.props.fullWidth ? '97%' : '94%',
@@ -232,7 +169,6 @@ class MainDateTimeInput extends React.Component {
                                 label: {
                                     "&.Mui-disabled": {
                                         color: this.props.colors.grey[1100],
-
                                     }
                                 },
                                 width: this.props.width ? this.props.width : this.props.fullWidth ? '97%' : '94%',

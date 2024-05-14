@@ -29,7 +29,6 @@ class MainTextField extends React.Component {
                 </Typography>
 
                 <TextField className="main-text-field"
-
                     sx={{
                         '& .MuiInputBase-root': {
                             fontSize: '16px', // Tamanho da fonte da label
@@ -41,10 +40,10 @@ class MainTextField extends React.Component {
                         },
                         '& .MuiOutlinedInput-root': {
                             '& fieldset': {
-                                borderColor: this.props.isFocused ? 'orange' : this.props.colors.grey[800], // cor da borda sem estar em foco
+                                borderColor: this.props.colors.grey[800], // cor da borda sem estar em foco
                             },
                             '&.Mui-focused fieldset': {
-                                borderColor: this.props.isFocused ? 'orange' : this.props.colors.grey[500], // cor da borda quando em foco
+                                borderColor: this.props.colors.grey[500], // cor da borda quando em foco
                             },
                             // '&:hover fieldset': {
                             //     borderColor: 'yellow', // cor da borda quando passado mouse por cima do input
@@ -73,7 +72,6 @@ class MainTextField extends React.Component {
                     onKeyUp={this.props.onKeyUp ?? null}
                     inputRef={this.props.innerRef ?? undefined}
                     id={this.props.id ?? undefined}
-                    onFocus={(params) => this.props.onFocus ? this.props.onFocus(params) : null}
                     variant={'outlined'}
                     type={this.props.type === 'number' ? 'number' : this.props.type === 'password' && !this.state.showPassword ? 'password' : 'text'}
                     disabled={this.props.disabled ?? false}
