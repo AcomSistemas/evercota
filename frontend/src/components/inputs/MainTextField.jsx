@@ -57,6 +57,7 @@ class MainTextField extends React.Component {
                             opacity: 0.7
                         },
                         '& .MuiInputBase-input': {
+                            padding: '10px',
                             boxShadow: 'inset 0 6px 5px -5px #888888', // boxShadow interno dos inputs
                             backgroundColor: 'transparent',  // cor do background do input
                             borderRadius: '25px'
@@ -84,8 +85,8 @@ class MainTextField extends React.Component {
                     onBlur={this.props.onBlur ?? null}
                     inputProps={{
                         maxLength: this.props.maxLength ?? undefined,
-                      }}
-                    
+                    }}
+
                     InputLabelProps={{
                         shrink: false
                     }}

@@ -11,7 +11,7 @@ import CancelIcon from '@mui/icons-material/Close';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Box, Button, Stack } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
-import { getNestedProperty } from '../../../utils/helpers';
+import { getNestedProperty } from '../../utils/helpers';
 import { GridRowModes, DataGrid, GridToolbarContainer, GridActionsCellItem, GridRowEditStopReasons } from '@mui/x-data-grid';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
@@ -116,20 +116,32 @@ class EditableTable extends React.Component {
             }
             if (this.props.extraColumnsConfig && value[0] in this.props.extraColumnsConfig) {
                 let type = this.props.extraColumnsConfig[value[0]]['type']
+
                 if (type === 'number') {
                     column['type'] = 'number'
-                } else if (type === 'currency') {
+                    column['valueParser'] = (value) => {
+
+                        const parsedValue = parseInt(value, 10)
+                        if (parsedValue < 1) {
+                            return 1
+                        } else if (parsedValue > 120) {
+                            return 120
+                        }
+                        return parsedValue
+                    }
+                } 
+                else if (type === 'currency') {
                     column['renderCell'] = (params) => {
                         if (params.value != null) {
-                            return `R$ ${params.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                            let adjustedValue = params.value > 99999 ? 99999 : params.value;
+                            return `R$ ${adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                         }
                     }
                 }
+                
             } else {
                 column['type'] = 'text'
             }
-
-
 
             if (value[0].split('.').length > 1) {
                 var path = 'params.row.' + value[0]
@@ -206,7 +218,7 @@ class EditableTable extends React.Component {
     handleSaveClick = (id) => () => {
         this.setState({
             rowModesModel: { ...this.state.rowModesModel, [id]: { mode: GridRowModes.View } },
-        })
+        }, () => this.props.calculateUnitValue())
     }
 
     onPageChange = (newPage) => {
@@ -250,7 +262,7 @@ class EditableTable extends React.Component {
                             '--DataGrid-containerBackground': 'transparent', // cor do background do cabeçalho transparente
                         },
                         columnHeader: {
-                            backgroundColor: 'white', // cor do cabeçalho
+                            backgroundColor: this.props.colors.grey[900], // cor do cabeçalho
                             maxHeight: '35px', // altura do header de cada coluna
                             '&[aria-colindex="1"]': { // borderRadius no cabeçalho da primeira coluna da tabela
                                 borderRadius: '20px 0 0 20px'
@@ -266,24 +278,24 @@ class EditableTable extends React.Component {
                             },
                         },
                         cell: {
+                            // backgroundColor: '#ccc',
+                            // height: '40px',
+                            // width: '80px',
                             '&.borders': {
                                 border: `1px solid ${this.props.colors.grey[700]}`,
-                                borderRadius: '10px'
+                                borderRadius: '10px',
                             }
-                        },
-                        row: {
-                            margin: '1px'
                         },
                         footerContainer: {
                             height: '30px',
                             minHeight: '30px',
-                            backgroundColor: 'white', // cor do footer
+                            backgroundColor: this.props.colors.grey[900], // cor do footer
                             borderRadius: '20px'
                         },
                         // row: {
-                        //     '&.Mui-selected': {                      // Cor da linha selecionada
+                        //     '&.Mui-selected': {                       // Cor da linha selecionada
                         //         backgroundColor: 'red',
-                        //         '&:hover, &.Mui-focusVisible': {     // cor da linha selecionada ao passar o mouse
+                        //         '&:hover, &.Mui-focusVisible': {      // cor da linha selecionada ao passar o mouse
                         //             backgroundColor: 'green',
                         //         },
                         //     },
@@ -419,14 +431,6 @@ class EditableTable extends React.Component {
                             onRowModesModelChange={this.handleRowModesModelChange}
                             onRowEditStop={this.handleRowEditStop}
                             onRowDoubleClick={(params, event) => { this.props.onRowDoubleClick(params.row, event) }}
-
-                            onCellClick={(params) => { // envia o params da célula clicada
-                                const isColumnDisabled = this.props.extraColumnsConfig?.[params.field]?.disabled
-                                if (!isColumnDisabled && this.props.onCellClick) {
-                                    this.props.onCellClick(params)
-                                    this.setState({ selectedCellId: params.id, selectedCellField: params.field })
-                                }
-                            }}
                         />
                     </LocalizationProvider>
                 </Box>
