@@ -131,6 +131,7 @@ class EditableTable extends React.Component {
                     }
                 } 
                 else if (type === 'currency') {
+                    column['type'] = 'number'
                     column['renderCell'] = (params) => {
                         if (params.value != null) {
                             let adjustedValue = params.value > 99999 ? 99999 : params.value;
@@ -218,7 +219,7 @@ class EditableTable extends React.Component {
     handleSaveClick = (id) => () => {
         this.setState({
             rowModesModel: { ...this.state.rowModesModel, [id]: { mode: GridRowModes.View } },
-        }, () => this.props.calculateUnitValue())
+        })
     }
 
     onPageChange = (newPage) => {
@@ -262,7 +263,7 @@ class EditableTable extends React.Component {
                             '--DataGrid-containerBackground': 'transparent', // cor do background do cabeçalho transparente
                         },
                         columnHeader: {
-                            backgroundColor: this.props.colors.grey[900], // cor do cabeçalho
+                            backgroundColor: this.props.colors.primary[400], // cor do cabeçalho
                             maxHeight: '35px', // altura do header de cada coluna
                             '&[aria-colindex="1"]': { // borderRadius no cabeçalho da primeira coluna da tabela
                                 borderRadius: '20px 0 0 20px'
@@ -289,7 +290,7 @@ class EditableTable extends React.Component {
                         footerContainer: {
                             height: '30px',
                             minHeight: '30px',
-                            backgroundColor: this.props.colors.grey[900], // cor do footer
+                            backgroundColor: this.props.colors.primary[400], // cor do footer
                             borderRadius: '20px'
                         },
                         // row: {

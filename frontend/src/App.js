@@ -10,7 +10,8 @@ import logo from "./data/logo.png";
 import logo2 from "./data/logo2.png";
 import banner from "./data/banner.png";
 
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import { defaultRequest } from "./utils/request/request";
 import { tokens } from "./typograhpy";
 import { useMode } from "./typograhpy";
 
@@ -35,82 +36,114 @@ class App extends React.Component {
 		super(props)
 		this.state = {
 			activeTab: 0,
-			isLoaded: true,
-			isLoadingTable: false,
-			loggedIn: false,
-			user: {},
-			userEdit: false,
+			isLoading: true,
+			isLoadingTable: true,
 
-			quotationList: [
-				{ "sku": 12345, "descricao": "Parafuso 6mm", "um": "un", "qtd_cotacao": 100, "qtd_embalagem": 1, "valor_embalagem": 100, "valor_unit": 0.66, "marca_desejada": "FixoBem", "marca_disp": "" },
-				{ "sku": 23456, "descricao": "Tubo PVC 100mm", "um": "mt", "qtd_cotacao": 120, "qtd_embalagem": 1, "valor_embalagem": 80, "valor_unit": 8, "marca_desejada": "Tubex", "marca_disp": "" },
-				{ "sku": 34567, "descricao": "Tinta Acrílica 18L", "um": "lt", "qtd_cotacao": 150, "qtd_embalagem": 1, "valor_embalagem": 250, "valor_unit": 13, "marca_desejada": "ColorMax", "marca_disp": "" },
-				{ "sku": 45678, "descricao": "Fita Isolante", "um": "pc", "qtd_cotacao": 200, "qtd_embalagem": 1, "valor_embalagem": 100, "valor_unit": 2, "marca_desejada": "IsolaMais", "marca_disp": "" },
-				{ "sku": 56789, "descricao": "Lâmpada LED 9W", "um": "un", "qtd_cotacao": 300, "qtd_embalagem": 1, "valor_embalagem": 150, "valor_unit": 5, "marca_desejada": "LuzBrilhante", "marca_disp": "" }
-			],
-			quotationColumns: [
-				['sku', 'SKU Everest'],
-				['descricao', 'Descrição'],
-				['um', 'UM'],
-				['qtd_cotacao', 'Qtd. Cotação'],
-				['qtd_embalagem', 'Qtd. Embalagem'],
-				['valor_embalagem', 'Valor Embalagem'],
-				['valor_unit', 'Valor Unitário'],
+			data: {
+				itens: []
+			},
+
+			dataColumns: [
+				['cd_item', 'SKU Everest'],
+				['ds_item', 'Descrição'],
+				['sg_unidademedida', 'UM'],
+				['qt_cotacao', 'Qtd. Cotação'],
+				['qt_embalagem_fornecedor', 'Qtd. Embalagem'],
+				['vl_embalagem', 'Valor Embalagem'],
+				['vl_unitario', 'Valor Unitário'],
 				['marca_desejada', 'Marca Desejada'],
-				['marca_disp', 'Marca Disponível'],
+				['marca', 'Marca Disponível'],
 			],
-			quotationTotalSize: 5,
+			dataItensTotalSize: '',
 		}
 		dayjs.locale('pt-br')
 	}
 
-	componentDidUpdate(prevProps, prevState) {
-		if(prevState.quotationList !== this.state.quotationList) {
-			this.setState({ qtdItens: this.state.quotationList.length }, 
-				() => { this.sumOfTablePackingValue()}
-			)
-		}
-
+	componentDidMount() {
+		this.getData()
+		// this.getData(this.calculateUnitValue())
 	}
 
-	calculateUnitValue = () => {
-		const updatedQuotationList = this.state.quotationList.map(item => {
-			const result = item.valor_embalagem / item.qtd_embalagem
-			return { ...item, valor_unit: result }
+	componentDidUpdate(prevProps, prevState) {
+		if (prevState.data.itens !== this.state.data.itens) {
+			this.setState({ dataItensTotalSize: this.state.data.itens.length },
+				() => { this.sumOfTablePackingValue() }
+			)
+		}
+	}
+
+	calculateUnitValue = () => { 		// Divide o "Valor da Embalagem" pela "Qtd. Embalagem" e coloca o resultado em "Valor Unitário"
+		const updatedData = this.state.data.itens.map(item => {
+			
+			const valorEmbalagem = parseFloat(item.vl_embalagem)
+			const qtEmbalagem = parseFloat(item.qt_embalagem_fornecedor)   // Ainda não funciona pois não tem o "Valor Embalagem"
+
+			let result = valorEmbalagem !== '' && qtEmbalagem !== ''
+				? parseFloat((valorEmbalagem / qtEmbalagem).toFixed(5)) 
+				: 0
+			return { ...item, vl_unitario: result }
 		})
-		this.setState({ quotationList: updatedQuotationList })
+		this.setState(prevState => ({
+			data: {
+				...prevState.data,
+				itens: updatedData
+			}
+		}))
+	}
+
+	getData = (callback) => {
+		let config = {
+			endpoint: `cota/cotacaoprecofornecedor/1`,
+			method: 'get'
+		}
+		let form = {
+			'x-Entidade': '2020133'
+		}
+		defaultRequest(config, form).then((r) => {
+			if (r.status) {
+				const [data_encerramento, horario_encerramento] = r.data.dh_cotacao_encerramento.split('T') // Fiz split dda data pois não vem campo horário no json
+
+				this.setState({
+					horario_encerramento: horario_encerramento,
+
+					data: r.data,
+
+					isLoading: false,
+					isLoadingTable: false
+				}, callback)
+			} else {
+				console.log('Erro ao trazer infos')
+			}
+		})
 	}
 
 	handleChangeText = (event) => {
 		this.setState({ [event.target.id]: event.target.value })
 	}
 
-	onTableEdit = (row, method, extraParam) => {
-		if (method === 'delete') {
-			this.setState({
-				quotationList: row
-			})
-			// }, () => this.deleteRow(extraParam))
-		}
-	}
+	onTableEdit = (row, method, extraParam) => { }
 
-	sumOfTablePackingValue = () => {
-		const { quotationList } = this.state
-
+	sumOfTablePackingValue = () => {    // Soma de todos os valores da coluna 'Valor Embalagem'
+		const { data } = this.state
 		let sum = 0
 
-		if (quotationList && quotationList.length > 0) {
-
-            for (let item of quotationList) {
-                sum += parseFloat(item.valor_embalagem)
-            }
-        } else {
-            sum = '0'
-        }
-        this.setState({ totalQuoteValue: sum }, () => console.log(sum))
+		if (data && data.itens && data.itens.length > 0) {
+			for (let item of data.itens) {
+				sum += parseFloat(item.valor_embalagem)  // TROCAR PELO "VALOR_EMBALAGEM" ** Já funciona com o campo que escolher
+			}
+		} else {
+			sum = 0
+		}
+		this.setState({ totalQuoteValue: sum })
 	}
+	
 
 	render() {
+		if (this.state.isLoading) {
+			return (
+				<></>
+			)
+		}
 		return (
 			<>
 				<Box className='navbar'>
@@ -120,12 +153,12 @@ class App extends React.Component {
 								<Box className='logo'><img src={logo}></img></Box>
 							</Box>
 							<Box className='navbar-infos'>
-								<Typography sx={{ fontSize: '12px' }}>Razão Social do Fornecedor | CNPJ 000.000.000/0000-00</Typography>
-								<Typography sx={{ fontSize: '12px' }}>Nome Fantasia do Fornecedor</Typography>
+								<Typography sx={{ fontSize: '12px' }}>{this.state.data.razao_fornecedor} | CNPJ {this.state.data.cpf_cnpj_Fornecedor}</Typography>
+								<Typography sx={{ fontSize: '12px' }}>{this.state.data.fantasia_Fornecedor}</Typography>
 							</Box>
 						</div>
 						<Box>
-							<Typography sx={{ fontSize: '12px' }}>Usuário do Fornecedor</Typography>
+							<Typography sx={{ fontSize: '12px' }}>{this.state.data.nm_usuario}</Typography>
 						</Box>
 					</div>
 				</Box>
@@ -140,13 +173,13 @@ class App extends React.Component {
 							</Box>
 							<Box className='navbar-infos'>
 								<Typography sx={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px' }}>Empresa solicitante:</Typography>
-								<Typography sx={{ fontSize: '12px' }}>Razão social do solicitante | CNPJ 000.000.000/0000-00</Typography>
-								<Typography sx={{ fontSize: '12px' }}>Nome fantasia do solicitante</Typography>
+								<Typography sx={{ fontSize: '12px' }}>{this.state.data.razao} | CNPJ {this.state.data.cpf_cnpj}</Typography>
+								<Typography sx={{ fontSize: '12px' }}>{this.state.data.fantasia}</Typography>
 							</Box>
 						</div>
 						<Box>
-							<Typography sx={{ fontSize: '12px' }}>Nome do contato</Typography>
-							<Typography sx={{ fontSize: '12px' }}>nomedocontato@solicitante.com.br | +55 00 00000-0000</Typography>
+							<Typography sx={{ fontSize: '12px' }}>Nome do contato ????</Typography>
+							<Typography sx={{ fontSize: '12px' }}>{this.state.data.email_particular} | +55 {this.state.data.nr_fone}</Typography>
 						</Box>
 					</Box>
 
@@ -165,7 +198,7 @@ class App extends React.Component {
 							<MainDateTimeInput
 								{...this.props}
 								id='priceDate'
-								value={this.state.priceDate}
+								value={this.state.data.dh_cotacao}
 								label='Data da Cotação'
 								handleChange={this.handleChangeText}
 								type='date'
@@ -176,7 +209,7 @@ class App extends React.Component {
 							<MainDateTimeInput
 								{...this.props}
 								id='limitDate'
-								value={this.state.limitDate}
+								value={this.state.data.dh_cotacao_encerramento}
 								label='Data Limite para Envio'
 								handleChange={this.handleChangeText}
 								type='date'
@@ -187,7 +220,7 @@ class App extends React.Component {
 							<MainDateTimeInput
 								{...this.props}
 								id='limitTime'
-								value={this.state.limitTime}
+								value={this.state.horario_encerramento} // Horário de encerramento após split
 								label='Horário Limite para Envio'
 								handleChange={this.handleChangeText}
 								type='time'
@@ -221,54 +254,52 @@ class App extends React.Component {
 						</Box>
 
 						<EditableTable
-							calculateUnitValue={this.calculateUnitValue}
 							{...this.props}
 							allowEdit
 							allowEditOnRow
 							noAddRow
-							id='sku'
+							noDeleteButton
+							id='id_item'
 							height='45vh'
-							data={this.state.quotationList}
-							columns={this.state.quotationColumns}
-							rowId='sku'
-							totalSize={this.state.quotationTotalSize}
+							data={this.state.data.itens}
+							columns={this.state.dataColumns}
+							rowId='id_item'
+							totalSize={this.state.dataItensTotalSize}
 							onPageChange={() => { }}
 							onEditRow={this.onTableEdit}
 							onRowDoubleClick={() => { }}
 							isLoading={this.state.isLoadingTable}
-							// onCellClick={() => {}} // Retorna 'params' da célula clicada
 							extraColumnsConfig={
 								{
-									'sku': {
+									'cd_item': {
 										'disabled': true,
 									},
-									'descricao': {
+									'ds_item': {
 										'disabled': true
 									},
-									'um': {
+									'sg_unidademedida': {
 										'disabled': true
 									},
-									'qtd_cotacao': {
+									'qt_cotacao': {
 										'disabled': true,
 									},
-									'marca_desejada': {
-										'disabled': true
-									},
-									'qtd_embalagem': {
+									'qt_embalagem_fornecedor': {
 										'type': 'number',
 										'borders': true
 									},
-									'valor_embalagem': {
+									'vl_embalagem': {
 										'type': 'currency', // tipo R$
 										'borders': true
 									},
-									'valor_unit': {
+									'vl_unitario': {
 										'disabled': true,
 										'type': 'currency', // tipo R$
-										'borders': true
 									},
-									'marca_disp': {
-										'borders': true
+									'marca_desejada': {
+										'disabled': true,
+									},
+									'marca': {
+										'borders': true,
 									},
 								}
 							}
@@ -292,7 +323,7 @@ class App extends React.Component {
 								<MainTextField
 									{...this.props}
 									id='deliveryTerm'
-									value={this.state.deliveryTerm || ''}
+									value={this.state.data.nr_dias_prazo_entrega || ''}
 									label='Prazo de Entrega (dias)'
 									handleChange={this.handleChangeText}
 									onKeyUp={this.handleKeyUp}
@@ -303,7 +334,7 @@ class App extends React.Component {
 								<MainTextField
 									{...this.props}
 									id='paymentTerm'
-									value={this.state.paymentTerm || ''}
+									value={this.state.data.nr_dias_prazo_pagamento || ''}
 									label='Prazo de Pagamento (dias)'
 									handleChange={this.handleChangeText}
 									onKeyUp={this.handleKeyUp}
@@ -323,8 +354,8 @@ class App extends React.Component {
 
 								<MainTextField
 									{...this.props}
-									id='qtdItens'
-									value={this.state.qtdItens || ''}
+									id='dataItensTotalSize'
+									value={this.state.dataItensTotalSize || ''}
 									label='Qtd. de Itens'
 									handleChange={this.handleChangeText}
 									onKeyUp={this.handleKeyUp}
@@ -351,7 +382,7 @@ class App extends React.Component {
 										backgroundColor: 'orange',
 										borderRadius: '8px'
 									}}
-									onButtonClick={() => console.log(typeof this.state.totalQuoteValue)}
+									onButtonClick={() => { }}
 									title="Enviar Cotação"
 									width='100%'
 								/>
