@@ -62,7 +62,7 @@ class EditableTable extends React.Component {
             rows: this.props.data,
             columns: [],
             rowModesModel: {},
-            paginationModel: { page: 0, pageSize: 10 },
+            paginationModel: { page: 0, pageSize: 100 },
             page: 0,
             isLoaded: false
         }
@@ -396,7 +396,7 @@ class EditableTable extends React.Component {
                             editMode="row"
                             loading={this.props.isLoading}
                             initialState={{
-                                pagination: { paginationModel: { pageSize: 10, page: 0 } }
+                                pagination: { paginationModel: { pageSize: 100, page: 0 } }
                             }}
                             slots={{
                                 toolbar: this.props.allowEditOnRow ? EditToolbar : null,

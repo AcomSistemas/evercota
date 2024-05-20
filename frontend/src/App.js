@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import EditableTable from "./components/tables/EditableTable";
 import MainButton from "./components/inputs/MainButton";
 import MainDateTimeInput from "./components/inputs/MainDateTimeInput";
+import MainSelectInput from "./components/inputs/MainSelectInput";
 import MainTextField from "./components/inputs/MainTextField";
 
 import logo from "./data/logo.png";
@@ -55,13 +56,35 @@ class App extends React.Component {
 				['marca', 'Marca Disponível'],
 			],
 			dataItensTotalSize: '',
+			totalQuoteValue: 0
 		}
 		dayjs.locale('pt-br')
 	}
 
 	componentDidMount() {
+		let config = {
+			endpoint: 'sis/condicaovendacompra',
+			method: 'get'
+		}
+		let form = {
+			'x-Entidade': '2020133',
+			'x-Pagina': 1
+		}
+		defaultRequest(config, form).then((r) => {
+			if (r.status) {
+				var options = r.data.map((value, index) => {
+					if(value.at_situacao == 1) {
+						return {...value, value: value.cd_condicaovendacompra, label: value.ds_condicaovendacompra}
+					}
+				})
+				this.setState({
+					paymentList: options
+				})
+			} else {
+				console.log('Erro ao trazer infos')
+			}
+		})
 		this.getData()
-		// this.getData(this.calculateUnitValue())
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -72,17 +95,21 @@ class App extends React.Component {
 		}
 	}
 
-	calculateUnitValue = () => { 		// Divide o "Valor da Embalagem" pela "Qtd. Embalagem" e coloca o resultado em "Valor Unitário"
-		const updatedData = this.state.data.itens.map(item => {
+	calculateUnitValue = (newData = null) => { 		// Divide o "Valor da Embalagem" pela "Qtd. Embalagem" e coloca o resultado em "Valor Unitário"
+		var mapData = newData ?? this.state.data.itens 
+
+		const updatedData = mapData.map(item => {
 			
 			const valorEmbalagem = parseFloat(item.vl_embalagem)
 			const qtEmbalagem = parseFloat(item.qt_embalagem_fornecedor)   // Ainda não funciona pois não tem o "Valor Embalagem"
-
-			let result = valorEmbalagem !== '' && qtEmbalagem !== ''
+			
+			let result = valorEmbalagem && qtEmbalagem
 				? parseFloat((valorEmbalagem / qtEmbalagem).toFixed(5)) 
 				: 0
 			return { ...item, vl_unitario: result }
 		})
+
+		console.log(updatedData)
 		this.setState(prevState => ({
 			data: {
 				...prevState.data,
@@ -110,7 +137,7 @@ class App extends React.Component {
 
 					isLoading: false,
 					isLoadingTable: false
-				}, callback)
+				}, () => this.calculateUnitValue())
 			} else {
 				console.log('Erro ao trazer infos')
 			}
@@ -121,7 +148,11 @@ class App extends React.Component {
 		this.setState({ [event.target.id]: event.target.value })
 	}
 
-	onTableEdit = (row, method, extraParam) => { }
+	onTableEdit = (row, method, extraParam) => {
+		if (method === 'edit') {
+			this.calculateUnitValue(row)
+        }
+	}
 
 	sumOfTablePackingValue = () => {    // Soma de todos os valores da coluna 'Valor Embalagem'
 		const { data } = this.state
@@ -129,7 +160,7 @@ class App extends React.Component {
 
 		if (data && data.itens && data.itens.length > 0) {
 			for (let item of data.itens) {
-				sum += parseFloat(item.valor_embalagem)  // TROCAR PELO "VALOR_EMBALAGEM" ** Já funciona com o campo que escolher
+				sum += item.vl_embalagem ? parseFloat(item.vl_embalagem) : 0 // TROCAR PELO "VALOR_EMBALAGEM" ** Já funciona com o campo que escolher
 			}
 		} else {
 			sum = 0
@@ -146,9 +177,10 @@ class App extends React.Component {
 		}
 		return (
 			<>
+				{console.log(this.state.data.itens)}
 				<Box className='navbar'>
-					<div class='navbar-container'>
-						<div class='left-container'>
+					<div className='navbar-container'>
+						<div className='left-container'>
 							<Box className='navbar-icon'>
 								<Box className='logo'><img src={logo}></img></Box>
 							</Box>
@@ -342,10 +374,11 @@ class App extends React.Component {
 									type='number'
 								/>
 
-								<MainTextField
+								<MainSelectInput
 									{...this.props}
-									id='formOfPayment'
-									value={this.state.formOfPayment || ''}
+									id='paymentType'
+									value={this.state.paymentType || ''}
+									optionsList={this.state.paymentList}
 									label='Forma de Pagamento'
 									handleChange={this.handleChangeText}
 									onKeyUp={this.handleKeyUp}
