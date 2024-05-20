@@ -10,8 +10,8 @@ body,
 }
 
 .app-body {
-	width: 98%;
-	margin-left: 10px;
+	width: 97%;	
+	padding-left: 20px;
 }
 
 /* NAVBAR */
@@ -19,14 +19,14 @@ body,
     background-color: #111A46; /* Cor de fundo azul escuro */
     color: white;
     display: flex;
-    justify-content: center;
     align-items: center;
     height: 60px;
 	margin-bottom: 50px;
+	padding: 0 20px;
 }
 
 .navbar-container {
-    width: 90%;
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -50,7 +50,7 @@ body,
 
 .banner img {
 	width: 100%;
-	border-radius: 5px;
+	border-radius: 10px;
 }
 
 /* COMPANY CONTAINER */
@@ -60,12 +60,13 @@ body,
 	display: flex;
     justify-content: space-between;
     align-items: center;
-	padding-right: 40px;
-	margin-bottom: 20px;
+	padding: 0 20px;
+	border-radius: 10px;
 }
 
 
 /* PRICE HEADER */
 .price-header {
-
+	background-color: white;
+	max-width: 100%;
 }
