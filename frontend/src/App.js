@@ -39,7 +39,7 @@ class App extends React.Component {
 			activeTab: 0,
 			isLoading: true,
 			isLoadingTable: true,
-
+			paymentList: [],
 			data: {
 				itens: []
 			},
@@ -74,7 +74,7 @@ class App extends React.Component {
 			if (r.status) {
 				var options = r.data.map((value, index) => {
 					if(value.at_situacao == 1) {
-						return {...value, value: value.cd_condicaovendacompra, label: value.ds_condicaovendacompra}
+						return {...value, value: value.cd_condicaovendacompra, label: value.cd_condicaovendacompra.toString() + ' - ' + value.ds_condicaovendacompra}
 					}
 				})
 				this.setState({
@@ -190,7 +190,7 @@ class App extends React.Component {
 							</Box>
 						</div>
 						<Box>
-							<Typography sx={{ fontSize: '12px' }}>{this.state.data.nm_usuario}</Typography>
+							<Typography sx={{ fontSize: '12px' }}></Typography>
 						</Box>
 					</div>
 				</Box>
@@ -210,7 +210,7 @@ class App extends React.Component {
 							</Box>
 						</div>
 						<Box>
-							<Typography sx={{ fontSize: '12px' }}>Nome do contato ????</Typography>
+							<Typography sx={{ fontSize: '12px' }}>{this.state.data.nm_usuario ?? ''}</Typography>
 							<Typography sx={{ fontSize: '12px' }}>{this.state.data.email_particular} | +55 {this.state.data.nr_fone}</Typography>
 						</Box>
 					</Box>
@@ -346,7 +346,7 @@ class App extends React.Component {
 									alignItems: 'end',
 									gridTemplateColumns: {
 										sm: '1fr',
-										md: '0.7fr 0.7fr 0.7fr 0.6fr 0.6fr 1fr 0.9fr',
+										md: '0.7fr 0.7fr 1.7fr 0.6fr 0.6fr 0.3fr 0.9fr',
 									},
 									marginTop: '10px'
 								}}
