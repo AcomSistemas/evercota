@@ -1,6 +1,7 @@
 import React from "react";
 
 import dayjs from "dayjs";
+import DialogAlert from "./components/alerts/DialogAlert";
 import EditableTable from "./components/tables/EditableTable";
 import MainButton from "./components/inputs/MainButton";
 import MainDateTimeInput from "./components/inputs/MainDateTimeInput";
@@ -36,15 +37,27 @@ function withHooks(WrappedComponent) {
 class App extends React.Component {
 	constructor(props) {
 		super(props)
+		const url = window.location.href
+		const match = url.split('/').slice(-2)
+		
+		let entity = null
+		let quoteId = null
+
+		if (match) {
+			entity = match[0]
+			quoteId = match[1]
+		}
+
 		this.state = {
 			isLoading: true,
 			isLoadingTable: true,
-
+			isDialogOpen: false,
+			isConfirmDialogOpen: false,
 			paymentList: [],
 
-			data: {
-				itens: []
-			},
+			data: null,
+			entity: entity,
+    		quoteId: quoteId,
 
 			dataColumns: [
 				['cd_item', 'SKU Everest'],
@@ -64,12 +77,13 @@ class App extends React.Component {
 	}
 
 	componentDidMount() {
+
 		let config = {
 			endpoint: 'sis/condicaovendacompra',
 			method: 'get'
 		}
 		let form = {
-			'x-Entidade': '2020133',
+			'x-Entidade': this.state.entity,
 			'x-Pagina': 1
 		}
 		defaultRequest(config, form).then((r) => {
@@ -90,7 +104,7 @@ class App extends React.Component {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (prevState.data.itens !== this.state.data.itens) {
+		if (prevState.data?.itens !== this.state.data?.itens) {
 			this.setState({ dataItensTotalSize: this.state.data.itens.length },
 				() => { this.sumOfTablePackingValue() }
 			)
@@ -111,7 +125,6 @@ class App extends React.Component {
 			return { ...item, vl_unitario: result }
 		})
 
-		console.log(updatedData)
 		this.setState(prevState => ({
 			data: {
 				...prevState.data,
@@ -120,16 +133,33 @@ class App extends React.Component {
 		}))
 	}
 
-	getData = () => {
+	cancelQuote = () => {
 		let config = {
-			endpoint: `cota/cotacaoprecofornecedor/2`,
-			method: 'get'
+			endpoint: 'cota/cotacaoprecofornecedor/' + this.state.data.id_cotacaoprecofornecedor,
+			method: 'delete'
 		}
 		let form = {
-			'x-Entidade': '2020133'
+			'x-Entidade': this.state.entity
 		}
 		defaultRequest(config, form).then((r) => {
 			if (r.status) {
+				
+			} else {
+				console.log('Erro ao trazer infos')
+			}
+		})
+	}
+
+	getData = (callback) => {
+		let config = {
+			endpoint: 'cota/cotacaoprecofornecedor/' + this.state.quoteId,
+			method: 'get'
+		}
+		let form = {
+			'x-Entidade': this.state.entity
+		}
+		defaultRequest(config, form).then((r) => {
+			if (r.status && r.data) {
 				let horario_encerramento
 				if (r.data.dh_cotacao_encerramento) {
 					horario_encerramento = r.data.dh_cotacao_encerramento.split('T')[1]
@@ -146,7 +176,7 @@ class App extends React.Component {
 					isLoadingTable: false
 				}, () => this.calculateUnitValue())
 			} else {
-				console.log('Erro ao trazer infos')
+				this.setState({isLoading: false})
 			}
 		})
 	}
@@ -170,7 +200,22 @@ class App extends React.Component {
 		}
 	}
 
-	sumOfTablePackingValue = () => {	// Soma de todos os valores da coluna 'Valor Embalagem'
+	sendQuote = () => {
+		let config = {
+			endpoint: 'cota/cotacaoprecofornecedor/1',
+			method: 'put'
+		}
+		let form = this.state.data
+		defaultRequest(config, form).then((r) => {
+			if (r.status) {
+
+			} else {
+				console.log('Erro ao trazer infos')
+			}
+		})
+	}
+
+	sumOfTablePackingValue = () => {    // Soma de todos os valores da coluna 'Valor Embalagem'
 		const { data } = this.state
 		let sum = 0
 
@@ -186,6 +231,7 @@ class App extends React.Component {
 
 
 	render() {
+		const datetimeNow = new Date()
 		if (this.state.isLoading) {
 			return (
 				<></>
@@ -193,7 +239,24 @@ class App extends React.Component {
 		}
 		return (
 			<>
-				{console.log(this.state.data.itens)}
+				<DialogAlert
+                    {...this.props}
+                    type='confirm'
+                    isOpen={this.state.isDialogOpen}
+                    title={'Deseja Recusar a Cotação'}
+                    body={'Ao confirmar a recusa da cotação, está será encerrada sem participação da sua empresa. Confirma recusa?'}
+					onClose={()=> this.setState({isDialogOpen: false})}
+                    onConfirm={ this.cancelQuote }
+                />
+				<DialogAlert
+                    {...this.props}
+                    type='confirm'
+                    isOpen={this.state.isConfirmDialogOpen}
+                    title={'Confirma o envio desta cotação?'}
+                    body={''}
+					onClose={()=> this.setState({isConfirmDialogOpen: false})}
+                    onConfirm={ this.sendQuote }
+                />
 				<Box className='navbar'>
 					<div className='navbar-container'>
 						<div className='left-container'>
@@ -201,8 +264,8 @@ class App extends React.Component {
 								<Box className='logo'><img src={logo}></img></Box>
 							</Box>
 							<Box className='navbar-infos'>
-								<Typography sx={{ fontSize: '12px' }}>{this.state.data.razao_fornecedor} | CNPJ {this.state.data.cpf_cnpj_Fornecedor}</Typography>
-								<Typography sx={{ fontSize: '12px' }}>{this.state.data.fantasia_Fornecedor}</Typography>
+								<Typography sx={{ fontSize: '12px' }}>{this.state.data?.razao_fornecedor} | CNPJ {this.state.data?.cpf_cnpj_Fornecedor}</Typography>
+								<Typography sx={{ fontSize: '12px' }}>{this.state.data?.fantasia_Fornecedor}</Typography>
 							</Box>
 						</div>
 						<Box>
@@ -214,213 +277,78 @@ class App extends React.Component {
 					<Box className='banner'>
 						<img src={banner}></img>
 					</Box>
-					<Box className='company-container'>
-						<div class='left-container'>
-							<Box className='navbar-icon'>
-								<Box className='logo'><img src={logo2}></img></Box>
+					{this.state.data ?
+					<>
+						<Box className='company-container'>
+							<div class='left-container'>
+								<Box className='navbar-icon'>
+									<Box className='logo'><img src={logo2}></img></Box>
+								</Box>
+								<Box className='navbar-infos'>
+									<Typography sx={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px' }}>Empresa solicitante:</Typography>
+									<Typography sx={{ fontSize: '12px' }}>{this.state.data.razao} | CNPJ {this.state.data.cpf_cnpj}</Typography>
+									<Typography sx={{ fontSize: '12px' }}>{this.state.data.fantasia}</Typography>
+								</Box>
+							</div>
+							<Box>
+								<Typography sx={{ fontSize: '12px' }}>{this.state.data.nm_usuario ?? ''}</Typography>
+								<Typography sx={{ fontSize: '12px' }}>{this.state.data.email_particular} | +55 {this.state.data.nr_fone}</Typography>
 							</Box>
-							<Box className='navbar-infos'>
-								<Typography sx={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px' }}>Empresa solicitante:</Typography>
-								<Typography sx={{ fontSize: '12px' }}>{this.state.data.razao} | CNPJ {this.state.data.cpf_cnpj}</Typography>
-								<Typography sx={{ fontSize: '12px' }}>{this.state.data.fantasia}</Typography>
-							</Box>
-						</div>
-						<Box>
-							<Typography sx={{ fontSize: '12px' }}>{this.state.data.nm_usuario ?? ''}</Typography>
-							<Typography sx={{ fontSize: '12px' }}>{this.state.data.email_particular} | +55 {this.state.data.nr_fone}</Typography>
-						</Box>
-					</Box>
-
-					<Box sx={{ backgroundColor: 'white', padding: '10px 20px', borderRadius: '10px', margin: '20px 0' }}>
-						<Box
-							sx={{
-								display: 'grid',
-								gap: '20px',
-								alignItems: 'center',
-								gridTemplateColumns: {
-									sm: '1fr',
-									md: '1fr 1fr 1fr 1fr 1fr 0.9fr',
-								},
-							}}
-						>
-							<MainDateTimeInput
-								{...this.props}
-								id='priceDate'
-								value={this.state.data.dh_cotacao}
-								label='Data da Cotação'
-								handleChange={this.handleChangeText}
-								type='date'
-								width='100%'
-								disabled='true'
-							/>
-
-							<MainDateTimeInput
-								{...this.props}
-								id='limitDate'
-								value={this.state.data.dh_cotacao_encerramento}
-								label='Data Limite para Envio'
-								handleChange={this.handleChangeText}
-								type='date'
-								width='100%'
-								disabled='true'
-							/>
-
-							<MainDateTimeInput
-								{...this.props}
-								id='limitTime'
-								value={this.state.horario_encerramento} // Horário de encerramento após split
-								label='Horário Limite para Envio'
-								handleChange={this.handleChangeText}
-								type='time'
-								width='100%'
-								disabled='true'
-							/>
-
-							<MainTextField
-								{...this.props}
-								id='expirationDays'
-								value={this.state.expirationDays || ''}
-								label='Número da Cotação'
-								handleChange={this.handleChangeText}
-								onKeyUp={this.handleKeyUp}
-								width='100%'
-							/>
-
-							<Box></Box>
-
-							<MainButton
-								{...this.props}
-								sx={{
-									borderColor: this.props.colors.redAccent[500],
-									textColor: this.props.colors.redAccent[500],
-									borderRadius: '8px'
-								}}
-								onButtonClick={() => { }}
-								title="Recusar Cotação"
-								width='100%'
-							/>
 						</Box>
 
-						<EditableTable
-							{...this.props}
-							allowEdit
-							allowEditOnRow
-							noAddRow
-							noDeleteButton
-							id='id_item'
-							height='45vh'
-							data={this.state.data.itens}
-							columns={this.state.dataColumns}
-							rowId='id_item'
-							totalSize={this.state.dataItensTotalSize}
-							onPageChange={() => { }}
-							onEditRow={this.onTableEdit}
-							onRowDoubleClick={() => { }}
-							isLoading={this.state.isLoadingTable}
-							extraColumnsConfig={
-								{
-									'cd_item': {
-										'disabled': true,
-									},
-									'ds_item': {
-										'disabled': true
-									},
-									'sg_unidademedida': {
-										'disabled': true
-									},
-									'qt_cotacao': {
-										'disabled': true,
-									},
-									'qt_embalagem_fornecedor': {
-										'type': 'number',
-										'borders': true
-									},
-									'vl_embalagem': {
-										'type': 'currency', // tipo R$
-										'borders': true
-									},
-									'vl_unitario': {
-										'disabled': true,
-										'type': 'currency', // tipo R$
-									},
-									'marca_desejada': {
-										'disabled': true,
-									},
-									'marca': {
-										'borders': true,
-									},
-								}
-							}
-						/>
-
-						<Box sx={{ marginTop: '30px' }}>
-							<Typography>Resumo da Cotação</Typography>
+						<Box sx={{ backgroundColor: 'white', padding: '10px 20px', borderRadius: '10px', margin: '20px 0' }}>
 							<Box
 								sx={{
 									display: 'grid',
 									gap: '20px',
-									alignItems: 'end',
+									alignItems: 'center',
 									gridTemplateColumns: {
 										sm: '1fr',
-										md: '0.6fr 0.6fr 1.3fr 0.6fr 0.6fr 0.2fr 0.9fr',
+										md: '1fr 1fr 1fr 1fr 1fr 0.9fr',
 									},
-									marginTop: '10px'
 								}}
 							>
-
-								<MainTextField
+								<MainDateTimeInput
 									{...this.props}
-									id='nr_dias_prazo_entrega'
-									value={this.state.data.nr_dias_prazo_entrega || ''}
-									label='Prazo de Entrega (dias)'
+									id='priceDate'
+									value={this.state.data.dh_cotacao}
+									label='Data da Cotação'
 									handleChange={this.handleChangeText}
-									onKeyUp={this.handleKeyUp}
+									type='date'
 									width='100%'
-									type='number'
+									disabled='true'
 								/>
 
-								<MainTextField
+								<MainDateTimeInput
 									{...this.props}
-									id='nr_dias_prazo_pagamento'
-									value={this.state.data.nr_dias_prazo_pagamento || ''}
-									label='Prazo de Pagamento (dias)'
+									id='limitDate'
+									value={this.state.data.dh_cotacao_encerramento}
+									label='Data Limite para Envio'
 									handleChange={this.handleChangeText}
-									onKeyUp={this.handleKeyUp}
+									type='date'
 									width='100%'
-									type='number'
+									disabled='true'
 								/>
 
-								<MainSelectInput
+								<MainDateTimeInput
 									{...this.props}
-									id='paymentType'
-									value={this.state.paymentType || ''}
-									optionsList={this.state.paymentList}
-									label='Forma de Pagamento'
+									id='limitTime'
+									value={this.state.horario_encerramento} // Horário de encerramento após split
+									label='Horário Limite para Envio'
 									handleChange={this.handleChangeText}
-									onKeyUp={this.handleKeyUp}
-									width='100%'
-								/>
-
-								<MainTextField
-									{...this.props}
-									id='dataItensTotalSize'
-									value={this.state.dataItensTotalSize || ''}
-									label='Qtd. de Itens'
-									handleChange={this.handleChangeText}
-									onKeyUp={this.handleKeyUp}
+									type='time'
 									width='100%'
 									disabled='true'
 								/>
 
 								<MainTextField
 									{...this.props}
-									id='totalQuoteValue'
-									value={this.state.totalQuoteValue || ''}
-									label='Valor Total da Cotação (R$)'
+									id='expirationDays'
+									value={this.state.expirationDays || ''}
+									label='Número da Cotação'
 									handleChange={this.handleChangeText}
 									onKeyUp={this.handleKeyUp}
 									width='100%'
-									disabled='true'
 								/>
 
 								<Box></Box>
@@ -428,18 +356,169 @@ class App extends React.Component {
 								<MainButton
 									{...this.props}
 									sx={{
-										backgroundColor: 'orange',
+										borderColor: this.props.colors.redAccent[500],
+										textColor: this.props.colors.redAccent[500],
 										borderRadius: '8px'
 									}}
-									onButtonClick={() => { }}
-									title="Enviar Cotação"
+									onButtonClick={() => { this.setState({ isDialogOpen: true }) }}
+									title="Recusar Cotação"
 									width='100%'
 								/>
 							</Box>
+
+							<EditableTable
+								{...this.props}
+								allowEdit
+								allowEditOnRow
+								noAddRow
+								noDeleteButton
+								id='id_item'
+								height='45vh'
+								data={this.state.data?.itens}
+								columns={this.state.dataColumns}
+								rowId='id_item'
+								totalSize={this.state.dataItensTotalSize}
+								onPageChange={() => { }}
+								onEditRow={this.onTableEdit}
+								onRowDoubleClick={() => { }}
+								isLoading={this.state.isLoadingTable}
+								extraColumnsConfig={
+									{
+										'cd_item': {
+											'disabled': true,
+										},
+										'ds_item': {
+											'disabled': true
+										},
+										'sg_unidademedida': {
+											'disabled': true
+										},
+										'qt_cotacao': {
+											'disabled': true,
+										},
+										'qt_embalagem_fornecedor': {
+											'type': 'number',
+											'borders': true
+										},
+										'vl_embalagem': {
+											'type': 'currency', // tipo R$
+											'borders': true
+										},
+										'vl_unitario': {
+											'disabled': true,
+											'type': 'currency', // tipo R$
+										},
+										'marca_desejada': {
+											'disabled': true,
+										},
+										'marca': {
+											'borders': true,
+										},
+									}
+								}
+							/>
+
+							<Box sx={{ marginTop: '30px' }}>
+								<Typography>Resumo da Cotação</Typography>
+								<Box
+									sx={{
+										display: 'grid',
+										gap: '20px',
+										alignItems: 'end',
+										gridTemplateColumns: {
+											sm: '1fr',
+											md: '0.6fr 0.6fr 1.3fr 0.6fr 0.6fr 0.2fr 0.9fr',
+										},
+										marginTop: '10px'
+									}}
+								>
+
+									<MainTextField
+										{...this.props}
+										id='nr_dias_prazo_entrega'
+										value={this.state.data.nr_dias_prazo_entrega || ''}
+										label='Prazo de Entrega (dias)'
+										handleChange={this.handleChangeText}
+										onKeyUp={this.handleKeyUp}
+										width='100%'
+										type='number'
+									/>
+
+									<MainTextField
+										{...this.props}
+										id='nr_dias_prazo_pagamento'
+										value={this.state.data.nr_dias_prazo_pagamento || ''}
+										label='Prazo de Pagamento (dias)'
+										handleChange={this.handleChangeText}
+										onKeyUp={this.handleKeyUp}
+										width='100%'
+										type='number'
+									/>
+
+									<MainSelectInput
+										{...this.props}
+										id='paymentType'
+										value={this.state.paymentType || ''}
+										optionsList={this.state.paymentList}
+										label='Forma de Pagamento'
+										handleChange={this.handleChangeText}
+										onKeyUp={this.handleKeyUp}
+										width='100%'
+									/>
+
+									<MainTextField
+										{...this.props}
+										id='dataItensTotalSize'
+										value={this.state.dataItensTotalSize || ''}
+										label='Qtd. de Itens'
+										handleChange={this.handleChangeText}
+										onKeyUp={this.handleKeyUp}
+										width='100%'
+										disabled='true'
+									/>
+
+									<MainTextField
+										{...this.props}
+										id='totalQuoteValue'
+										value={this.state.totalQuoteValue || ''}
+										label='Valor Total da Cotação (R$)'
+										handleChange={this.handleChangeText}
+										onKeyUp={this.handleKeyUp}
+										width='100%'
+										disabled='true'
+									/>
+
+									<Box></Box>
+									{this.state.data.dh_cotacao_encerramento > datetimeNow ?
+										<MainButton
+											{...this.props}
+											sx={{
+												backgroundColor: 'orange',
+												borderRadius: '8px'
+											}}
+											onButtonClick={() => { this.setState({isConfirmDialogOpen: true}) }}
+											title="Enviar Cotação"
+											width='100%'
+										/>
+									:
+										<MainButton
+											{...this.props}
+											sx={{
+												backgroundColor: this.props.colors.redAccent[500],
+												borderRadius: '8px',
+												cursor: 'auto'
+											}}
+											onButtonClick={() => { }}
+											title="Cotação Encerrada"
+											width='100%'
+											disabled
+										/>
+									}
+								</Box>
+							</Box>
 						</Box>
-					</Box>
-
-
+					</>
+					: <></>}
 				</Box>
 			</>
 		)

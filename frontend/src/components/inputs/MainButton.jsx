@@ -26,7 +26,7 @@ class MainButton extends React.Component {
                     ...sx
                 }}
             >
-                <Button sx={{ width: '100%', borderRadius: borderRadius, border: `1px ${borderColor} solid` }}><Typography sx={{ color: textColor, fontWeight: '500', letterSpacing: '1px', textTransform: 'none' }}>{this.props.title}</Typography></Button>
+                <Button sx={{ width: '100%', borderRadius: borderRadius, border: `1px ${borderColor} solid` }} disabled={this.props.disabled ?? null}><Typography sx={{ color: textColor, fontWeight: '500', letterSpacing: '1px', textTransform: 'none' }}>{this.props.title}</Typography></Button>
             </Box>
         )
     }
