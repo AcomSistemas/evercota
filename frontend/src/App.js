@@ -32,14 +32,16 @@ function withHooks(WrappedComponent) {
 	}
 }
 
+
 class App extends React.Component {
 	constructor(props) {
 		super(props)
 		this.state = {
-			activeTab: 0,
 			isLoading: true,
 			isLoadingTable: true,
+
 			paymentList: [],
+
 			data: {
 				itens: []
 			},
@@ -55,8 +57,8 @@ class App extends React.Component {
 				['marca_desejada', 'Marca Desejada'],
 				['marca', 'Marca Disponível'],
 			],
+
 			dataItensTotalSize: '',
-			totalQuoteValue: 0
 		}
 		dayjs.locale('pt-br')
 	}
@@ -73,8 +75,8 @@ class App extends React.Component {
 		defaultRequest(config, form).then((r) => {
 			if (r.status) {
 				var options = r.data.map((value, index) => {
-					if(value.at_situacao == 1) {
-						return {...value, value: value.cd_condicaovendacompra, label: value.cd_condicaovendacompra.toString() + ' - ' + value.ds_condicaovendacompra}
+					if (value.at_situacao == 1) {
+						return { ...value, value: value.cd_condicaovendacompra, label: value.cd_condicaovendacompra.toString() + ' - ' + value.ds_condicaovendacompra }
 					}
 				})
 				this.setState({
@@ -95,16 +97,16 @@ class App extends React.Component {
 		}
 	}
 
-	calculateUnitValue = (newData = null) => { 		// Divide o "Valor da Embalagem" pela "Qtd. Embalagem" e coloca o resultado em "Valor Unitário"
-		var mapData = newData ?? this.state.data.itens 
+	calculateUnitValue = (newData = null) => {	// Divide o "Valor da Embalagem" pela "Qtd. Embalagem" e coloca o resultado em "Valor Unitário"
+		var mapData = newData ?? this.state.data.itens
 
 		const updatedData = mapData.map(item => {
-			
+
 			const valorEmbalagem = parseFloat(item.vl_embalagem)
-			const qtEmbalagem = parseFloat(item.qt_embalagem_fornecedor)   // Ainda não funciona pois não tem o "Valor Embalagem"
-			
+			const qtEmbalagem = parseFloat(item.qt_embalagem_fornecedor)
+
 			let result = valorEmbalagem && qtEmbalagem
-				? parseFloat((valorEmbalagem / qtEmbalagem).toFixed(5)) 
+				? parseFloat((valorEmbalagem / qtEmbalagem).toFixed(5))
 				: 0
 			return { ...item, vl_unitario: result }
 		})
@@ -118,9 +120,9 @@ class App extends React.Component {
 		}))
 	}
 
-	getData = (callback) => {
+	getData = () => {
 		let config = {
-			endpoint: `cota/cotacaoprecofornecedor/1`,
+			endpoint: `cota/cotacaoprecofornecedor/2`,
 			method: 'get'
 		}
 		let form = {
@@ -128,7 +130,12 @@ class App extends React.Component {
 		}
 		defaultRequest(config, form).then((r) => {
 			if (r.status) {
-				const [data_encerramento, horario_encerramento] = r.data.dh_cotacao_encerramento.split('T') // Fiz split dda data pois não vem campo horário no json
+				let horario_encerramento
+				if (r.data.dh_cotacao_encerramento) {
+					horario_encerramento = r.data.dh_cotacao_encerramento.split('T')[1]
+				} else {
+					horario_encerramento = null
+				}
 
 				this.setState({
 					horario_encerramento: horario_encerramento,
@@ -145,29 +152,38 @@ class App extends React.Component {
 	}
 
 	handleChangeText = (event) => {
-		this.setState({ [event.target.id]: event.target.value })
+		if (event.target.id === 'expirationDays' || event.target.id === 'paymentType') {
+			this.setState({ [event.target.id]: event.target.value })
+		} else {
+			this.setState(prevState => ({
+				data: {
+					...prevState.data,
+					[event.target.id]: event.target.value
+				}
+			}))
+		}
 	}
 
 	onTableEdit = (row, method, extraParam) => {
 		if (method === 'edit') {
 			this.calculateUnitValue(row)
-        }
+		}
 	}
 
-	sumOfTablePackingValue = () => {    // Soma de todos os valores da coluna 'Valor Embalagem'
+	sumOfTablePackingValue = () => {	// Soma de todos os valores da coluna 'Valor Embalagem'
 		const { data } = this.state
 		let sum = 0
 
 		if (data && data.itens && data.itens.length > 0) {
 			for (let item of data.itens) {
-				sum += item.vl_embalagem ? parseFloat(item.vl_embalagem) : 0 // TROCAR PELO "VALOR_EMBALAGEM" ** Já funciona com o campo que escolher
+				sum += item.vl_embalagem ? parseFloat(item.vl_embalagem) : 0
 			}
 		} else {
 			sum = 0
 		}
 		this.setState({ totalQuoteValue: sum })
 	}
-	
+
 
 	render() {
 		if (this.state.isLoading) {
@@ -346,7 +362,7 @@ class App extends React.Component {
 									alignItems: 'end',
 									gridTemplateColumns: {
 										sm: '1fr',
-										md: '0.7fr 0.7fr 1.7fr 0.6fr 0.6fr 0.3fr 0.9fr',
+										md: '0.6fr 0.6fr 1.3fr 0.6fr 0.6fr 0.2fr 0.9fr',
 									},
 									marginTop: '10px'
 								}}
@@ -354,7 +370,7 @@ class App extends React.Component {
 
 								<MainTextField
 									{...this.props}
-									id='deliveryTerm'
+									id='nr_dias_prazo_entrega'
 									value={this.state.data.nr_dias_prazo_entrega || ''}
 									label='Prazo de Entrega (dias)'
 									handleChange={this.handleChangeText}
@@ -365,7 +381,7 @@ class App extends React.Component {
 
 								<MainTextField
 									{...this.props}
-									id='paymentTerm'
+									id='nr_dias_prazo_pagamento'
 									value={this.state.data.nr_dias_prazo_pagamento || ''}
 									label='Prazo de Pagamento (dias)'
 									handleChange={this.handleChangeText}
