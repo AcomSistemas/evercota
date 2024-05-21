@@ -7,6 +7,7 @@ import MainButton from "./components/inputs/MainButton";
 import MainDateTimeInput from "./components/inputs/MainDateTimeInput";
 import MainSelectInput from "./components/inputs/MainSelectInput";
 import MainTextField from "./components/inputs/MainTextField";
+import SnackbarAlert from "./components/alerts/SnackbarAlert";
 
 import logo from "./data/logo.png";
 import logo2 from "./data/logo2.png";
@@ -53,6 +54,11 @@ class App extends React.Component {
 			isLoadingTable: true,
 			isDialogOpen: false,
 			isConfirmDialogOpen: false,
+
+			alertMessage: '',
+			alertType: '',
+			showAlert: false,
+
 			paymentList: [],
 
 			data: null,
@@ -143,14 +149,24 @@ class App extends React.Component {
 		}
 		defaultRequest(config, form).then((r) => {
 			if (r.status) {
-				
+				this.setState({
+					isDialogOpen: false,
+					alertMessage: 'Cotação cancelada com sucesso',
+                    alertType: 'success',
+                    showAlert: true,
+				})
 			} else {
-				console.log('Erro ao trazer infos')
+				this.setState({
+					isDialogOpen: false,
+					alertMessage: 'Erro ao cancelar cotação',
+                    alertType: 'error',
+                    showAlert: true,
+				})
 			}
 		})
 	}
 
-	getData = (callback) => {
+	getData = () => {
 		let config = {
 			endpoint: 'cota/cotacaoprecofornecedor/' + this.state.quoteId,
 			method: 'get'
@@ -202,15 +218,26 @@ class App extends React.Component {
 
 	sendQuote = () => {
 		let config = {
-			endpoint: 'cota/cotacaoprecofornecedor/1',
+			endpoint: 'cota/cotacaoprecofornecedor/' + this.state.quoteId + '?x-Entidade=' + this.state.entity,
 			method: 'put'
 		}
-		let form = this.state.data
+		let form = {
+			'CotacaoPrecoFornecedor': this.state.data
+		}
 		defaultRequest(config, form).then((r) => {
 			if (r.status) {
-
+				this.setState({
+					isConfirmDialogOpen: false,
+					alertMessage: 'Cotação gravada com sucesso',
+                    alertType: 'success',
+                    showAlert: true,
+				})
 			} else {
-				console.log('Erro ao trazer infos')
+				this.setState({
+					alertMessage: 'Não foi possível gerar a cotação, tente mais tarde sem fechar esta página',
+                    alertType: 'error',
+                    showAlert: true,
+				})
 			}
 		})
 	}
@@ -239,6 +266,7 @@ class App extends React.Component {
 		}
 		return (
 			<>
+				{this.state.showAlert ? <SnackbarAlert {...this.props} alertType={this.state.alertType} open={true} message={this.state.alertMessage} onClose={() => this.setState({ showAlert: false, alertMessage: '' })} /> : <></>}
 				<DialogAlert
                     {...this.props}
                     type='confirm'
@@ -349,10 +377,11 @@ class App extends React.Component {
 									handleChange={this.handleChangeText}
 									onKeyUp={this.handleKeyUp}
 									width='100%'
+									disabled={this.state.data.at_situacao != 759 ? true : false}
 								/>
 
 								<Box></Box>
-
+								{this.state.data.at_situacao == 759 ?
 								<MainButton
 									{...this.props}
 									sx={{
@@ -363,7 +392,7 @@ class App extends React.Component {
 									onButtonClick={() => { this.setState({ isDialogOpen: true }) }}
 									title="Recusar Cotação"
 									width='100%'
-								/>
+								/> : <></>}
 							</Box>
 
 							<EditableTable
@@ -396,23 +425,31 @@ class App extends React.Component {
 										'qt_cotacao': {
 											'disabled': true,
 										},
-										'qt_embalagem_fornecedor': {
+										'qt_embalagem_fornecedor': this.state.data.at_situacao === 759 ? {
 											'type': 'number',
-											'borders': true
+											'borders': true,
+										} : {
+											'disabled': true
 										},
-										'vl_embalagem': {
-											'type': 'currency', // tipo R$
-											'borders': true
+										'vl_embalagem': this.state.data.at_situacao === 759 ? {
+											'type': 'number',
+											'borders': true,
+										} : {
+											'disabled': true
 										},
-										'vl_unitario': {
-											'disabled': true,
-											'type': 'currency', // tipo R$
+										'vl_unitario': this.state.data.at_situacao === 759 ? {
+											'type': 'number',
+											'borders': true,
+										} : {
+											'disabled': true
 										},
 										'marca_desejada': {
 											'disabled': true,
 										},
-										'marca': {
+										'marca': this.state.data.at_situacao === 759 ? {
 											'borders': true,
+										} : {
+											'disabled': true
 										},
 									}
 								}
@@ -442,6 +479,7 @@ class App extends React.Component {
 										onKeyUp={this.handleKeyUp}
 										width='100%'
 										type='number'
+										disabled={this.state.data.at_situacao != 759 ? true : false}
 									/>
 
 									<MainTextField
@@ -453,6 +491,7 @@ class App extends React.Component {
 										onKeyUp={this.handleKeyUp}
 										width='100%'
 										type='number'
+										disabled={this.state.data.at_situacao != 759 ? true : false}
 									/>
 
 									<MainSelectInput
@@ -464,6 +503,7 @@ class App extends React.Component {
 										handleChange={this.handleChangeText}
 										onKeyUp={this.handleKeyUp}
 										width='100%'
+										disabled={this.state.data.at_situacao != 759 ? true : false}
 									/>
 
 									<MainTextField
@@ -489,7 +529,7 @@ class App extends React.Component {
 									/>
 
 									<Box></Box>
-									{this.state.data.dh_cotacao_encerramento > datetimeNow ?
+									{new Date(this.state.data.dh_cotacao_encerramento) > datetimeNow && this.state.data.at_situacao === 759 ?
 										<MainButton
 											{...this.props}
 											sx={{

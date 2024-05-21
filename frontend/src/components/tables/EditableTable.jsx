@@ -279,12 +279,12 @@ class EditableTable extends React.Component {
                             },
                         },
                         cell: {
-                            // backgroundColor: '#ccc',
-                            // height: '40px',
-                            // width: '80px',
+                            height: '49px',
+                            margin: '2px 0',
                             '&.borders': {
                                 border: `1px solid ${this.props.colors.grey[700]}`,
                                 borderRadius: '10px',
+                                marginRight: '2px'
                             }
                         },
                         footerContainer: {
