@@ -12,8 +12,45 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Box, Button, Stack } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { getNestedProperty } from '../../utils/helpers';
-import { GridRowModes, DataGrid, GridToolbarContainer, GridActionsCellItem, GridRowEditStopReasons } from '@mui/x-data-grid';
+import { GridRowModes, DataGrid, GridToolbarContainer, GridActionsCellItem, GridRowEditStopReasons, GridEditInputCell } from '@mui/x-data-grid';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+
+class CurrencyEditInput extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            inputValue: (props.value || '').toString().replace('.', ',')
+        }
+    }
+
+    handleChange = (event) => {
+        const { maxDigits } = this.props
+        const newValue = event.target.value
+        // Colocar máximo de dígitos com base no maxDigits
+        const regex = new RegExp(`^\\d{0,${maxDigits}}(,\\d{0,2})?$`)
+
+        if (newValue.match(regex)) {
+            this.setState({ inputValue: newValue })
+            this.props.api.setEditCellValue({
+                id: this.props.id,
+                field: this.props.field,
+                value: newValue.replace(',', '.')
+            }, event)
+        }
+    }
+
+    render() {
+        return (
+            <GridEditInputCell
+                {...this.props}
+                value={this.state.inputValue}
+                onChange={this.handleChange}
+                type="text"
+            />
+        )
+    }
+}
 
 
 class EditToolbar extends React.Component {
@@ -119,27 +156,27 @@ class EditableTable extends React.Component {
 
                 if (type === 'number') {
                     column['type'] = 'number'
-                    column['valueParser'] = (value) => {
-
-                        const parsedValue = parseInt(value, 10)
-                        if (parsedValue < 1) {
-                            return 1
-                        } else if (parsedValue > 120) {
-                            return 120
-                        }
-                        return parsedValue
-                    }
-                } 
-                else if (type === 'currency') {
-                    column['type'] = 'number'
+                    column['maxDigits'] = 3
+                    column['renderEditCell'] = (params) => <CurrencyEditInput {...params} maxDigits={column['maxDigits']} />
                     column['renderCell'] = (params) => {
                         if (params.value != null) {
-                            let adjustedValue = params.value > 99999 ? 99999 : params.value;
-                            return `R$ ${adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                            let adjustedValue = params.value > 99999 ? 99999 : params.value
+                            return adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                         }
                     }
                 }
-                
+                else if (type === 'currency') {
+                    column['type'] = 'number'
+                    column['maxDigits'] = 5
+                    column['renderEditCell'] = (params) => <CurrencyEditInput {...params} maxDigits={column['maxDigits']} />
+                    column['renderCell'] = (params) => {
+                        if (params.value != null) {
+                            let adjustedValue = params.value > 99999 ? 99999 : params.value
+                            return `R$ ${adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        }
+                    }
+                }
+
             } else {
                 column['type'] = 'text'
             }

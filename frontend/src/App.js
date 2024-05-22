@@ -115,6 +115,16 @@ class App extends React.Component {
 				() => { this.sumOfTablePackingValue() }
 			)
 		}
+
+		if (this.state.totalQuoteValue !== prevState.totalQuoteValue) {
+			const numericValue = parseFloat(this.state.totalQuoteValue.toString().replace(',', '.'))
+			if (!isNaN(numericValue)) {
+				const formattedValue = numericValue.toFixed(2).replace('.', ',')
+				if (formattedValue !== this.state.totalQuoteValue) {
+					this.setState({ totalQuoteValue: formattedValue })
+				}
+			}
+		}
 	}
 
 	calculateUnitValue = (newData = null) => {	// Divide o "Valor da Embalagem" pela "Qtd. Embalagem" e coloca o resultado em "Valor Unitário"
@@ -429,18 +439,21 @@ class App extends React.Component {
 											'type': 'number',
 											'borders': true,
 										} : {
+											'type': 'number',
 											'disabled': true
 										},
 										'vl_embalagem': this.state.data.at_situacao === 759 ? {
-											'type': 'number',
+											'type': 'currency',
 											'borders': true,
 										} : {
+											'type': 'currency',
 											'disabled': true
 										},
 										'vl_unitario': this.state.data.at_situacao === 759 ? {
-											'type': 'number',
+											'type': 'currency',
 											'borders': true,
 										} : {
+											'type': 'currency',
 											'disabled': true
 										},
 										'marca_desejada': {
