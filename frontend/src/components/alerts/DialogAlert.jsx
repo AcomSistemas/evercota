@@ -33,9 +33,9 @@ class DialogAlert extends React.Component {
                         alignItems: 'center',
                     }}
                 >
-                    {this.props.type == 'confirm' ?
+                    {this.props.type === 'confirm' ?
                         <CheckCircleIcon style={{ color: this.props.colors.greenAccent[500], fontSize: 60 }} />
-                        : this.props.type == 'cancel' ?
+                        : this.props.type === 'cancel' ?
                             <CancelIcon style={{ color: this.props.colors.redAccent[500], fontSize: 60 }} />
                             : <></>
                     }

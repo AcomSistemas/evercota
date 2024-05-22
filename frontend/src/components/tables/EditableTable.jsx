@@ -159,7 +159,7 @@ class EditableTable extends React.Component {
                     column['maxDigits'] = 3
                     column['renderEditCell'] = (params) => <CurrencyEditInput {...params} maxDigits={column['maxDigits']} />
                     column['renderCell'] = (params) => {
-                        if (params.value != null) {
+                        if (params.value !== null) {
                             let adjustedValue = params.value > 99999 ? 99999 : params.value
                             return adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                         }
@@ -170,7 +170,7 @@ class EditableTable extends React.Component {
                     column['maxDigits'] = 5
                     column['renderEditCell'] = (params) => <CurrencyEditInput {...params} maxDigits={column['maxDigits']} />
                     column['renderCell'] = (params) => {
-                        if (params.value != null) {
+                        if (params.value !== null) {
                             let adjustedValue = params.value > 99999 ? 99999 : params.value
                             return `R$ ${adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                         }
