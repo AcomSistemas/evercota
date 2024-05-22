@@ -186,7 +186,12 @@ class App extends React.Component {
 		}
 		defaultRequest(config, form).then((r) => {
 			if (r.status && r.data) {
+
+				const datetimeNow = new Date()
+				const isValid = new Date(r.data.dh_cotacao_encerramento) > datetimeNow && r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
+
 				let horario_encerramento
+
 				if (r.data.dh_cotacao_encerramento) {
 					horario_encerramento = r.data.dh_cotacao_encerramento.split('T')[1]
 				} else {
@@ -198,8 +203,10 @@ class App extends React.Component {
 
 					data: r.data,
 
+					isValid: isValid,
+
 					isLoading: false,
-					isLoadingTable: false
+					isLoadingTable: false,
 				}, () => this.calculateUnitValue())
 			} else {
 				this.setState({ isLoading: false })
@@ -208,7 +215,7 @@ class App extends React.Component {
 	}
 
 	handleChangeText = (event) => {
-		if (event.target.id === 'expirationDays' || event.target.id === 'paymentType') {
+		if (event.target.id === 'paymentType') {
 			this.setState({ [event.target.id]: event.target.value })
 		} else {
 			this.setState(prevState => ({
@@ -268,7 +275,6 @@ class App extends React.Component {
 
 
 	render() {
-		const datetimeNow = new Date()
 		if (this.state.isLoading) {
 			return (
 				<></>
@@ -276,7 +282,6 @@ class App extends React.Component {
 		}
 		return (
 			<>
-				{console.log(this.state.data)}
 				{this.state.showAlert ? <SnackbarAlert {...this.props} alertType={this.state.alertType} open={true} message={this.state.alertMessage} onClose={() => this.setState({ showAlert: false, alertMessage: '' })} /> : <></>}
 				<DialogAlert
 					{...this.props}
@@ -296,6 +301,7 @@ class App extends React.Component {
 					onClose={() => this.setState({ isConfirmDialogOpen: false })}
 					onConfirm={this.sendQuote}
 				/>
+
 				<Box className='navbar'>
 					<div className='navbar-container'>
 						<div className='left-container'>
@@ -312,230 +318,86 @@ class App extends React.Component {
 						</Box>
 					</div>
 				</Box>
-				<Box className='app-body'>
-					<Box className='banner'>
-						<img src={banner} alt="Banner"></img>
+
+				<Box className='banner'>
+					<img src={banner} alt="Banner"></img>
+				</Box>
+
+				{this.state.data.at_situacao === 3 || this.state.data.at_situacao_cotacao === 1 ?
+					<Box className='app-body-empty'>
+					Cotação Não Encontrada...
 					</Box>
-					{this.state.data ?
-						<>
-							<Box className='company-container'>
-								<div className='left-container'>
-									<Box className='navbar-icon'>
-										<Box className='logo'><img src={logo2} alt="Logo"></img></Box>
+					:
+					<Box className='app-body'>
+						{this.state.data ?
+							<>
+								<Box className='company-container'>
+									<div className='left-container'>
+										<Box className='navbar-icon'>
+											<Box className='logo'><img src={logo2} alt="Logo"></img></Box>
+										</Box>
+										<Box className='navbar-infos'>
+											<Typography sx={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px' }}>Empresa solicitante:</Typography>
+											<Typography sx={{ fontSize: '12px' }}>{this.state.data.razao} | CNPJ {this.state.data.cpf_cnpj}</Typography>
+											<Typography sx={{ fontSize: '12px' }}>{this.state.data.fantasia}</Typography>
+										</Box>
+									</div>
+									<Box>
+										<Typography sx={{ fontSize: '12px' }}>{this.state.data.nm_usuario ?? ''}</Typography>
+										<Typography sx={{ fontSize: '12px' }}>{this.state.data.email_particular} | +55 {this.state.data.nr_fone}</Typography>
 									</Box>
-									<Box className='navbar-infos'>
-										<Typography sx={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px' }}>Empresa solicitante:</Typography>
-										<Typography sx={{ fontSize: '12px' }}>{this.state.data.razao} | CNPJ {this.state.data.cpf_cnpj}</Typography>
-										<Typography sx={{ fontSize: '12px' }}>{this.state.data.fantasia}</Typography>
-									</Box>
-								</div>
-								<Box>
-									<Typography sx={{ fontSize: '12px' }}>{this.state.data.nm_usuario ?? ''}</Typography>
-									<Typography sx={{ fontSize: '12px' }}>{this.state.data.email_particular} | +55 {this.state.data.nr_fone}</Typography>
-								</Box>
-							</Box>
-
-							<Box sx={{ backgroundColor: 'white', padding: '10px 20px', borderRadius: '10px', margin: '20px 0' }}>
-								<Box
-									sx={{
-										display: 'grid',
-										gap: '20px',
-										alignItems: 'center',
-										gridTemplateColumns: {
-											sm: '1fr',
-											md: '1fr 1fr 1fr 1fr 1fr 0.9fr',
-										},
-									}}
-								>
-									<MainDateTimeInput
-										{...this.props}
-										id='priceDate'
-										value={this.state.data.dh_cotacao}
-										label='Data da Cotação'
-										handleChange={this.handleChangeText}
-										type='date'
-										width='100%'
-										disabled='true'
-									/>
-
-									<MainDateTimeInput
-										{...this.props}
-										id='limitDate'
-										value={this.state.data.dh_cotacao_encerramento}
-										label='Data Limite para Envio'
-										handleChange={this.handleChangeText}
-										type='date'
-										width='100%'
-										disabled='true'
-									/>
-
-									<MainDateTimeInput
-										{...this.props}
-										id='limitTime'
-										value={this.state.horario_encerramento} // Horário de encerramento após split
-										label='Horário Limite para Envio'
-										handleChange={this.handleChangeText}
-										type='time'
-										width='100%'
-										disabled='true'
-									/>
-
-									<MainTextField
-										{...this.props}
-										id='expirationDays'
-										value={this.state.expirationDays || ''}
-										label='Número da Cotação'
-										handleChange={this.handleChangeText}
-										onKeyUp={this.handleKeyUp}
-										width='100%'
-										disabled={this.state.data.at_situacao !== 759 ? true : false}
-									/>
-
-									<Box></Box>
-									{this.state.data.at_situacao === 759 ?
-										<MainButton
-											{...this.props}
-											sx={{
-												borderColor: this.props.colors.redAccent[500],
-												textColor: this.props.colors.redAccent[500],
-												borderRadius: '8px'
-											}}
-											onButtonClick={() => { this.setState({ isDialogOpen: true }) }}
-											title="Recusar Cotação"
-											width='100%'
-										/> : <></>}
 								</Box>
 
-								<EditableTable
-									{...this.props}
-									allowEdit
-									allowEditOnRow
-									noAddRow
-									noDeleteButton
-									id='id_item'
-									height='45vh'
-									data={this.state.data?.itens}
-									columns={this.state.dataColumns}
-									rowId='id_item'
-									totalSize={this.state.dataItensTotalSize}
-									onPageChange={() => { }}
-									onEditRow={this.onTableEdit}
-									onRowDoubleClick={() => { }}
-									isLoading={this.state.isLoadingTable}
-									extraColumnsConfig={
-										{
-											'cd_item': {
-												'disabled': true,
-											},
-											'ds_item': {
-												'disabled': true
-											},
-											'sg_unidademedida': {
-												'disabled': true
-											},
-											'qt_cotacao': {
-												'disabled': true,
-											},
-											'qt_embalagem_fornecedor': this.state.data.at_situacao === 759 ? {
-												'type': 'number',
-												'borders': true,
-											} : {
-												'type': 'number',
-												'disabled': true
-											},
-											'vl_embalagem': this.state.data.at_situacao === 759 ? {
-												'type': 'currency',
-												'borders': true,
-											} : {
-												'type': 'currency',
-												'disabled': true
-											},
-											'vl_unitario': this.state.data.at_situacao === 759 ? {
-												'type': 'currency',
-												'borders': true,
-											} : {
-												'type': 'currency',
-												'disabled': true
-											},
-											'marca_desejada': {
-												'disabled': true,
-											},
-											'marca': this.state.data.at_situacao === 759 ? {
-												'borders': true,
-											} : {
-												'disabled': true
-											},
-										}
-									}
-								/>
-
-								<Box sx={{ marginTop: '30px' }}>
-									<Typography>Resumo da Cotação</Typography>
+								<Box sx={{ backgroundColor: 'white', padding: '10px 20px', borderRadius: '10px', margin: '20px 0' }}>
 									<Box
 										sx={{
 											display: 'grid',
 											gap: '20px',
-											alignItems: 'end',
+											alignItems: 'center',
 											gridTemplateColumns: {
 												sm: '1fr',
-												md: '0.6fr 0.6fr 1.3fr 0.6fr 0.6fr 0.2fr 0.9fr',
+												md: '1fr 1fr 1fr 1fr 1fr 0.9fr',
 											},
-											marginTop: '10px'
 										}}
 									>
-
-										<MainTextField
+										<MainDateTimeInput
 											{...this.props}
-											id='nr_dias_prazo_entrega'
-											value={this.state.data.nr_dias_prazo_entrega || ''}
-											label='Prazo de Entrega (dias)'
+											id='priceDate'
+											value={this.state.data.dh_cotacao}
+											label='Data da Cotação'
 											handleChange={this.handleChangeText}
-											onKeyUp={this.handleKeyUp}
+											type='date'
 											width='100%'
-											type='number'
-											disabled={this.state.data.at_situacao !== 759 ? true : false}
+											disabled='true'
 										/>
 
-										<MainTextField
+										<MainDateTimeInput
 											{...this.props}
-											id='nr_dias_prazo_pagamento'
-											value={this.state.data.nr_dias_prazo_pagamento || ''}
-											label='Prazo de Pagamento (dias)'
+											id='limitDate'
+											value={this.state.data.dh_cotacao_encerramento}
+											label='Data Limite para Envio'
 											handleChange={this.handleChangeText}
-											onKeyUp={this.handleKeyUp}
+											type='date'
 											width='100%'
-											type='number'
-											disabled={this.state.data.at_situacao !== 759 ? true : false}
+											disabled='true'
 										/>
 
-										<MainSelectInput
+										<MainDateTimeInput
 											{...this.props}
-											id='paymentType'
-											value={this.state.paymentType || ''}
-											optionsList={this.state.paymentList}
-											label='Forma de Pagamento'
+											id='limitTime'
+											value={this.state.horario_encerramento} // Horário de encerramento após split
+											label='Horário Limite para Envio'
 											handleChange={this.handleChangeText}
-											onKeyUp={this.handleKeyUp}
-											width='100%'
-											disabled={this.state.data.at_situacao !== 759 ? true : false}
-										/>
-
-										<MainTextField
-											{...this.props}
-											id='dataItensTotalSize'
-											value={this.state.dataItensTotalSize || ''}
-											label='Qtd. de Itens'
-											handleChange={this.handleChangeText}
-											onKeyUp={this.handleKeyUp}
+											type='time'
 											width='100%'
 											disabled='true'
 										/>
 
 										<MainTextField
 											{...this.props}
-											id='totalQuoteValue'
-											value={this.state.totalQuoteValue || ''}
-											label='Valor Total da Cotação (R$)'
+											id='id_cotacaoprecofornecedor'
+											value={this.state.data.id_cotacaoprecofornecedor || ''}
+											label='Número da Cotação'
 											handleChange={this.handleChangeText}
 											onKeyUp={this.handleKeyUp}
 											width='100%'
@@ -543,37 +405,187 @@ class App extends React.Component {
 										/>
 
 										<Box></Box>
-										{new Date(this.state.data.dh_cotacao_encerramento) > datetimeNow && this.state.data.at_situacao === 759 ?
+										{this.state.isValid ?
 											<MainButton
 												{...this.props}
 												sx={{
-													backgroundColor: 'orange',
+													borderColor: this.props.colors.redAccent[500],
+													textColor: this.props.colors.redAccent[500],
 													borderRadius: '8px'
 												}}
-												onButtonClick={() => { this.setState({ isConfirmDialogOpen: true }) }}
-												title="Enviar Cotação"
+												onButtonClick={() => { this.setState({ isDialogOpen: true }) }}
+												title="Recusar Cotação"
 												width='100%'
-											/>
-											:
-											<MainButton
-												{...this.props}
-												sx={{
-													backgroundColor: this.props.colors.redAccent[500],
-													borderRadius: '8px',
-													cursor: 'auto'
-												}}
-												onButtonClick={() => { }}
-												title="Cotação Encerrada"
-												width='100%'
-												disabled
-											/>
+											/> : <></>}
+									</Box>
+
+									<EditableTable
+										{...this.props}
+										allowEdit
+										allowEditOnRow
+										noAddRow
+										noDeleteButton
+										id='id_item'
+										height='45vh'
+										data={this.state.data?.itens}
+										columns={this.state.dataColumns}
+										rowId='id_item'
+										totalSize={this.state.dataItensTotalSize}
+										onPageChange={() => { }}
+										onEditRow={this.onTableEdit}
+										onRowDoubleClick={() => { }}
+										isLoading={this.state.isLoadingTable}
+										extraColumnsConfig={
+											{
+												'cd_item': {
+													'disabled': true,
+												},
+												'ds_item': {
+													'disabled': true
+												},
+												'sg_unidademedida': {
+													'disabled': true
+												},
+												'qt_cotacao': {
+													'type': 'number',
+													'disabled': true,
+												},
+												'qt_embalagem_fornecedor': this.state.isValid ? {
+													'type': 'number',
+													'borders': true,
+												} : {
+													'type': 'number',
+													'disabled': true
+												},
+												'vl_embalagem': this.state.isValid ? {
+													'type': 'currency',
+													'borders': true,
+												} : {
+													'type': 'currency',
+													'disabled': true
+												},
+												'vl_unitario': {
+													'type': 'currency',
+													'disabled': true
+												},
+												'marca_desejada': {
+													'disabled': true,
+												},
+												'marca': this.state.isValid ? {
+													'borders': true,
+												} : {
+													'disabled': true
+												},
+											}
 										}
+									/>
+
+									<Box sx={{ marginTop: '30px' }}>
+										<Typography>Resumo da Cotação</Typography>
+										<Box
+											sx={{
+												display: 'grid',
+												gap: '20px',
+												alignItems: 'end',
+												gridTemplateColumns: {
+													sm: '1fr',
+													md: '0.6fr 0.6fr 1.3fr 0.6fr 0.6fr 0.2fr 0.9fr',
+												},
+												marginTop: '10px'
+											}}
+										>
+
+											<MainTextField
+												{...this.props}
+												id='nr_dias_prazo_entrega'
+												value={this.state.data.nr_dias_prazo_entrega || ''}
+												label='Prazo de Entrega (dias)'
+												handleChange={this.handleChangeText}
+												onKeyUp={this.handleKeyUp}
+												width='100%'
+												type='number'
+												disabled={!this.state.isValid}
+											/>
+
+											<MainTextField
+												{...this.props}
+												id='nr_dias_prazo_pagamento'
+												value={this.state.data.nr_dias_prazo_pagamento || ''}
+												label='Prazo de Pagamento (dias)'
+												handleChange={this.handleChangeText}
+												onKeyUp={this.handleKeyUp}
+												width='100%'
+												type='number'
+												disabled={!this.state.isValid}
+											/>
+
+											<MainSelectInput
+												{...this.props}
+												id='paymentType'
+												value={this.state.paymentType || ''}
+												optionsList={this.state.paymentList}
+												label='Forma de Pagamento'
+												handleChange={this.handleChangeText}
+												onKeyUp={this.handleKeyUp}
+												width='100%'
+												disabled={!this.state.isValid}
+											/>
+
+											<MainTextField
+												{...this.props}
+												id='dataItensTotalSize'
+												value={this.state.dataItensTotalSize || ''}
+												label='Qtd. de Itens'
+												handleChange={this.handleChangeText}
+												onKeyUp={this.handleKeyUp}
+												width='100%'
+												disabled='true'
+											/>
+
+											<MainTextField
+												{...this.props}
+												id='totalQuoteValue'
+												value={this.state.totalQuoteValue || ''}
+												label='Valor Total da Cotação (R$)'
+												handleChange={this.handleChangeText}
+												onKeyUp={this.handleKeyUp}
+												width='100%'
+												disabled='true'
+											/>
+
+											<Box></Box>
+											{this.state.isValid ?
+												<MainButton
+													{...this.props}
+													sx={{
+														backgroundColor: 'orange',
+														borderRadius: '8px'
+													}}
+													onButtonClick={() => { this.setState({ isConfirmDialogOpen: true }) }}
+													title="Enviar Cotação"
+													width='100%'
+												/>
+												:
+												<MainButton
+													{...this.props}
+													sx={{
+														backgroundColor: this.props.colors.redAccent[500],
+														borderRadius: '8px',
+														cursor: 'auto'
+													}}
+													onButtonClick={() => { }}
+													title="Cotação Encerrada"
+													width='100%'
+													disabled
+												/>
+											}
+										</Box>
 									</Box>
 								</Box>
-							</Box>
-						</>
-						: <></>}
-				</Box>
+							</>
+							: <></>}
+					</Box>
+				}
 			</>
 		)
 	}

@@ -28,7 +28,7 @@ class CurrencyEditInput extends React.Component {
         const { maxDigits } = this.props
         const newValue = event.target.value
         // Colocar máximo de dígitos com base no maxDigits
-        const regex = new RegExp(`^\\d{0,${maxDigits}}(,\\d{0,2})?$`)
+        const regex = new RegExp(`^\\d{0,${maxDigits}}(,\\d{0,4})?$`)
 
         if (newValue.match(regex)) {
             this.setState({ inputValue: newValue })
@@ -161,7 +161,7 @@ class EditableTable extends React.Component {
                     column['renderCell'] = (params) => {
                         if (params.value !== null) {
                             let adjustedValue = params.value > 99999 ? 99999 : params.value
-                            return adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                            return adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })
                         }
                     }
                 }
@@ -172,7 +172,7 @@ class EditableTable extends React.Component {
                     column['renderCell'] = (params) => {
                         if (params.value !== null) {
                             let adjustedValue = params.value > 99999 ? 99999 : params.value
-                            return `R$ ${adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                            return `R$ ${adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`
                         }
                     }
                 }
