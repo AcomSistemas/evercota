@@ -188,7 +188,8 @@ class App extends React.Component {
 			if (r.status && r.data) {
 
 				const datetimeNow = new Date()
-				const isValid = new Date(r.data.dh_cotacao_encerramento) > datetimeNow && r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
+				// const isValid = new Date(r.data.dh_cotacao_encerramento) > datetimeNow && r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
+				const isValid = r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
 
 				let horario_encerramento
 

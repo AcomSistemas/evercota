@@ -243,6 +243,50 @@ class EditableTable extends React.Component {
         })
     }
 
+    handleKeyDown = (params, event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault()
+            event.stopPropagation()
+            const currentField = params.field
+            const currentRowIndex = this.state.rows.findIndex(row => row.id_item === params.id)
+            const editableRows = ['qt_embalagem_fornecedor', 'vl_embalagem', 'marca']
+            const currentFieldIndex = editableRows.indexOf(currentField);
+            
+            if (currentFieldIndex < editableRows.length - 1) {
+                
+                // Move to the next field in the same row
+                const nextField = editableRows[currentFieldIndex + 1]
+                const row = document.querySelector(`[data-id='${params.id}']`)
+                const nextCell = row.querySelector(`[data-field='${nextField}']`)
+                
+                if (nextCell) {
+                    nextCell.click()
+                    nextCell.focus()
+                }
+            } else {
+                // Save the current row and move to the first field of the next row
+                const nextRowIndex = currentRowIndex + 1;
+                if (nextRowIndex < this.state.rows.length) {
+                    const nextRow = this.state.rows[nextRowIndex]
+                    const row = document.querySelector(`[data-id='${nextRow.id_item}']`)
+                    const nextCell = row.querySelector(`[data-field='qt_embalagem_fornecedor']`)
+
+                    const saveButton = document.querySelector(`[data-id='${params.id}']`).querySelector(`[data-field='actions']`).querySelector(`[role='menu']`).querySelector(`[aria-label='Cancel']`)
+                    
+                    this.setState({
+
+                    }, ()=> this.handleSaveClick2(params.id))
+                    saveButton.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
+                    if (nextCell) {
+                        nextCell.click()
+                        nextCell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
+                        nextCell.focus()
+                    }
+                }
+            }
+        }
+    }
+
     handleRowEditStop = (params, event) => {
         if (params.reason === GridRowEditStopReasons.rowFocusOut) {
             event.defaultMuiPrevented = true;
@@ -254,6 +298,12 @@ class EditableTable extends React.Component {
     }
 
     handleSaveClick = (id) => () => {
+        this.setState({
+            rowModesModel: { ...this.state.rowModesModel, [id]: { mode: GridRowModes.View } },
+        })
+    }
+
+    handleSaveClick2 = (id) => {
         this.setState({
             rowModesModel: { ...this.state.rowModesModel, [id]: { mode: GridRowModes.View } },
         })
@@ -469,6 +519,7 @@ class EditableTable extends React.Component {
                             onRowModesModelChange={this.handleRowModesModelChange}
                             onRowEditStop={this.handleRowEditStop}
                             onRowDoubleClick={(params, event) => { this.props.onRowDoubleClick(params.row, event) }}
+                            onCellKeyDown={this.handleKeyDown}
                         />
                     </LocalizationProvider>
                 </Box>
