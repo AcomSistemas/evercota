@@ -266,17 +266,13 @@ class EditableTable extends React.Component {
             } else {
                 // Save the current row and move to the first field of the next row
                 const nextRowIndex = currentRowIndex + 1;
+                this.setState({}, ()=> this.handleSaveClick2(params.id))
                 if (nextRowIndex < this.state.rows.length) {
                     const nextRow = this.state.rows[nextRowIndex]
                     const row = document.querySelector(`[data-id='${nextRow.id_item}']`)
                     const nextCell = row.querySelector(`[data-field='qt_embalagem_fornecedor']`)
 
-                    const saveButton = document.querySelector(`[data-id='${params.id}']`).querySelector(`[data-field='actions']`).querySelector(`[role='menu']`).querySelector(`[aria-label='Cancel']`)
                     
-                    this.setState({
-
-                    }, ()=> this.handleSaveClick2(params.id))
-                    saveButton.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
                     if (nextCell) {
                         nextCell.click()
                         nextCell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
