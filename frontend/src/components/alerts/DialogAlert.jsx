@@ -16,9 +16,10 @@ class DialogAlert extends React.Component {
             <Dialog className='dialog-box' open={this.props.isOpen} onClose={this.handleClose} onTransitionExited={this.props.onExit ?? null}
                 sx={{
                     '& .MuiPaper-root': {
-                        height:' 40%',
-                        width: '60%',
-                        alignItems: 'center'
+                        height:' 30%',
+                        width: '25%',
+                        alignItems: 'center',
+                        borderRadius: '10px'
                     }
                 }}
             >
@@ -41,7 +42,7 @@ class DialogAlert extends React.Component {
                     }
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin: '18px 0' }}>
-                        <Typography sx={{ fontSize: '15px' }}>{this.props.title}</Typography>
+                        <Typography sx={{ fontSize: '15px', marginBottom: '10px' }}>{this.props.title}</Typography>
                         <Typography sx={{ fontSize: '16px', fontWeight: '500', textAlign: 'center' }}> {this.props.body}</Typography>
                     </Box>
                     <Box width='70%' display='flex' justifyContent='space-around' alignItems='center' gap='20px'>

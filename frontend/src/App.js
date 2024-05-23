@@ -83,7 +83,6 @@ class App extends React.Component {
 	}
 
 	componentDidMount() {
-
 		let config = {
 			endpoint: 'sis/condicaovendacompra',
 			method: 'get'
@@ -101,12 +100,11 @@ class App extends React.Component {
 				})
 				this.setState({
 					paymentList: options
-				})
+				}, () => this.getData())
 			} else {
 				console.log('Erro ao trazer infos')
 			}
 		})
-		this.getData()
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -145,7 +143,8 @@ class App extends React.Component {
 			data: {
 				...prevState.data,
 				itens: updatedData
-			}
+			},
+			isLoading: false
 		}))
 	}
 
@@ -188,8 +187,8 @@ class App extends React.Component {
 			if (r.status && r.data) {
 
 				const datetimeNow = new Date()
-				// const isValid = new Date(r.data.dh_cotacao_encerramento) > datetimeNow && r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
-				const isValid = r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
+				const isValid = new Date(r.data.dh_cotacao_encerramento) > datetimeNow && r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
+				// const isValid = r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
 
 				let horario_encerramento
 
@@ -230,7 +229,8 @@ class App extends React.Component {
 
 	onTableEdit = (row, method, extraParam) => {
 		if (method === 'edit') {
-			this.calculateUnitValue(row)
+			this.setState({ isLoading: true}, 
+				() =>  this.calculateUnitValue(row))
 		}
 	}
 
@@ -288,8 +288,8 @@ class App extends React.Component {
 					{...this.props}
 					type='confirm'
 					isOpen={this.state.isDialogOpen}
-					title={'Deseja Recusar a Cotação'}
-					body={'Ao confirmar a recusa da cotação, está será encerrada sem participação da sua empresa. Confirma recusa?'}
+					title={'Deseja Recusar a Cotação ?'}
+					body={'Ao confirmar a recusa, esta será encerrada sem participação da sua empresa.'}
 					onClose={() => this.setState({ isDialogOpen: false })}
 					onConfirm={this.cancelQuote}
 				/>
