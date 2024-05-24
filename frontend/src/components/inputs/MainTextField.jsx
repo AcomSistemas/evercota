@@ -106,7 +106,15 @@ class MainTextField extends React.Component {
                             </>
                             : <></>
                     }}
-                    onChange={(e) => { this.props.handleChange(e) }}
+                    onChange={(e) => {
+                        if (this.props.type === 'number') {  // Verificação aplicada somente para campos numéricos
+                            const value = parseInt(e.target.value, 10);
+                            if (value < 0) {
+                                e.target.value = 0;  // Ajusta para 0 se o valor for negativo
+                            }
+                        }
+                        this.props.handleChange(e);
+                    }}
                 />
             </Box>
         )
@@ -115,7 +123,7 @@ class MainTextField extends React.Component {
 
 // Componente funcional para encaminhar ref
 const ForwardedMainTextField = forwardRef((props, ref) => {
-    return <MainTextField {...props} innerRef={ref} />;
+    return <MainTextField {...props} innerRef={ref} />
 })
 
 export default ForwardedMainTextField

@@ -9,7 +9,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { Box, Button, Stack } from '@mui/material';
+import { Box, Button, Stack, TextField } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { getNestedProperty } from '../../utils/helpers';
 import { GridRowModes, DataGrid, GridToolbarContainer, GridActionsCellItem, GridRowEditStopReasons, GridEditInputCell } from '@mui/x-data-grid';
@@ -95,6 +95,9 @@ class EditToolbar extends React.Component {
 class EditableTable extends React.Component {
     constructor(props) {
         super(props)
+
+        this.editableFields = ['qt_embalagem_fornecedor', 'vl_embalagem', 'marca']
+
         this.state = {
             rows: this.props.data,
             columns: [],
@@ -156,7 +159,7 @@ class EditableTable extends React.Component {
 
                 if (type === 'number') {
                     column['type'] = 'number'
-                    column['maxDigits'] = 3
+                    column['maxDigits'] = 5
                     column['renderEditCell'] = (params) => <CurrencyEditInput {...params} maxDigits={column['maxDigits']} />
                     column['renderCell'] = (params) => {
                         if (params.value !== null) {
@@ -176,9 +179,56 @@ class EditableTable extends React.Component {
                         }
                     }
                 }
+                else if (type === 'text') {
+                    column['renderEditCell'] = (params) => {
+                        // Assegura que params.value é uma string, mesmo que o valor seja nulo
+                        const value = params.value ? params.value.toString().toUpperCase() : '';
+                        return (
+                            <TextField
+                                sx={{
+                                    fontSize: '10px',
+                                    backgroundColor: 'transparent',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    '& .MuiInputBase-root': {
+                                        fontSize: '14px',
+                                    },
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: 'transparent', // Remove a borda quando não está em foco
+                                            borderWidth: '1px', // Pode ajustar a espessura da borda
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: 'transparent', // Bordas em hover, ajuste a cor conforme necessário
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: 'transparent', // Cor da borda quando focado, ajuste conforme necessário
+                                            borderWidth: '2px', // Aumenta a borda quando focado
+                                        },
+                                    },
+                                }}
+                                value={value}
+                                onChange={(event) => {
+                                    const newValue = event.target.value;
+                                    params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue }, event);
+                                }}
+                                inputProps={{
+                                    maxLength: 30
+                                }}
+                                fullWidth
+                                variant="outlined"
+                                autoFocus
+                                inputRef={input => input && input.focus()}
+                            />
+                        );
+                    };
+                    column['renderCell'] = (params) => (
+                        params.value ? params.value.toString().toUpperCase() : ''
+                    )
+                }
 
             } else {
-                column['type'] = 'text'
             }
 
             if (value[0].split('.').length > 1) {
@@ -240,7 +290,29 @@ class EditableTable extends React.Component {
     handleEditClick = (id) => () => {
         this.setState({
             rowModesModel: { ...this.state.rowModesModel, [id]: { mode: GridRowModes.Edit } },
+        }, () => {
+            this.focusFirstCell(id)
         })
+    }
+
+    focusFirstCell = (id) => {
+        setTimeout(() => {
+            const rowElement = document.querySelector(`[data-id='${id}']`)
+            if (rowElement) {
+                // Itera pelos campos editáveis e foca no primeiro que encontrar
+                for (let field of this.editableFields) {
+                    const cell = rowElement.querySelector(`[data-field='${field}']`)
+                    if (cell) {
+                        cell.click() // Dispara o modo de edição
+                        const inputElement = cell.querySelector('input, textarea, select')
+                        if (inputElement) {
+                            inputElement.focus()
+                            break // Sai do loop após focar no primeiro campo editável
+                        }
+                    }
+                }
+            }
+        }, 100)
     }
 
     handleKeyDown = (params, event) => {
@@ -250,15 +322,15 @@ class EditableTable extends React.Component {
             const currentField = params.field
             const currentRowIndex = this.state.rows.findIndex(row => row.id_item === params.id)
             const editableRows = ['qt_embalagem_fornecedor', 'vl_embalagem', 'marca']
-            const currentFieldIndex = editableRows.indexOf(currentField);
-            
+            const currentFieldIndex = editableRows.indexOf(currentField)
+
             if (currentFieldIndex < editableRows.length - 1) {
-                
+
                 // Move to the next field in the same row
                 const nextField = editableRows[currentFieldIndex + 1]
                 const row = document.querySelector(`[data-id='${params.id}']`)
                 const nextCell = row.querySelector(`[data-field='${nextField}']`)
-                
+
                 if (nextCell) {
                     nextCell.click()
                     nextCell.focus()
@@ -266,15 +338,15 @@ class EditableTable extends React.Component {
             } else {
                 // Save the current row and move to the first field of the next row
                 const nextRowIndex = currentRowIndex + 1;
-                this.setState({}, ()=> this.handleSaveClick2(params.id))
+                this.setState({}, () => this.handleSaveClick2(params.id))
                 if (nextRowIndex < this.state.rows.length) {
                     const nextRow = this.state.rows[nextRowIndex]
                     const row = document.querySelector(`[data-id='${nextRow.id_item}']`)
                     const nextCell = row.querySelector(`[data-field='qt_embalagem_fornecedor']`)
 
-                    
+
                     if (nextCell) {
-                        this.setState({currentRow: nextCell})
+                        this.setState({ currentRow: nextCell })
                         nextCell.click()
                         nextCell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
                         nextCell.focus()

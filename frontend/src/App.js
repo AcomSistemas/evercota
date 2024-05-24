@@ -145,7 +145,7 @@ class App extends React.Component {
 				itens: updatedData
 			},
 			isLoading: false
-		}), ()=> {
+		}), () => {
 			if (currentRow) {
 				currentRow.click()
 				currentRow.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
@@ -215,7 +215,14 @@ class App extends React.Component {
 					isLoadingTable: false,
 				}, () => this.calculateUnitValue())
 			} else {
-				this.setState({ isLoading: false })
+				this.setState(prevState => ({
+					data: {
+						...prevState.data,
+						at_situacao_cotacao: 1,
+						at_situacao: 3
+					},
+					isLoading: false
+				}))
 			}
 		})
 	}
@@ -235,12 +242,29 @@ class App extends React.Component {
 
 	onTableEdit = (row, method, extraParam, currentRow) => {
 		if (method === 'edit') {
-			this.setState({ isLoading: true}, 
-				() =>  this.calculateUnitValue(row, currentRow))
+			this.setState({ isLoading: true },
+				() => this.calculateUnitValue(row, currentRow))
 		}
 	}
 
 	sendQuote = () => {
+		if (this.state.data) {
+			this.state.data.qt_embalagem = this.state.data.qt_embalagem || 0
+			this.state.data.vl_embalagem = this.state.data.vl_embalagem || 0
+
+			if (!this.state.data.nr_dias_prazo_entrega ||
+				!this.state.data.nr_dias_prazo_pagamento ||
+				!this.state.paymentType
+			) {
+				this.setState({
+					alertMessage: 'Preencha todos os campos obrigatórios (*)',
+					alertType: 'error',
+					showAlert: true,
+					isConfirmDialogOpen: false
+				})
+				return
+			}
+		}
 		let config = {
 			endpoint: 'cota/cotacaoprecofornecedor/' + this.state.quoteId + '?x-Entidade=' + this.state.entity,
 			method: 'put'
@@ -255,7 +279,7 @@ class App extends React.Component {
 					alertMessage: 'Cotação gravada com sucesso',
 					alertType: 'success',
 					showAlert: true,
-				})
+				}, () => window.location.reload())
 			} else {
 				this.setState({
 					alertMessage: 'Não foi possível gerar a cotação, tente mais tarde sem fechar esta página',
@@ -332,7 +356,7 @@ class App extends React.Component {
 
 				{this.state.data.at_situacao === 3 || this.state.data.at_situacao_cotacao === 1 ?
 					<Box className='app-body-empty'>
-					Cotação Não Encontrada...
+						Cotação Não Encontrada...
 					</Box>
 					:
 					<Box className='app-body'>
@@ -479,6 +503,7 @@ class App extends React.Component {
 													'disabled': true,
 												},
 												'marca': this.state.isValid ? {
+													'type': 'text',
 													'borders': true,
 												} : {
 													'disabled': true
@@ -512,6 +537,7 @@ class App extends React.Component {
 												width='100%'
 												type='number'
 												disabled={!this.state.isValid}
+												required
 											/>
 
 											<MainTextField
@@ -524,6 +550,7 @@ class App extends React.Component {
 												width='100%'
 												type='number'
 												disabled={!this.state.isValid}
+												required
 											/>
 
 											<MainSelectInput
@@ -536,6 +563,7 @@ class App extends React.Component {
 												onKeyUp={this.handleKeyUp}
 												width='100%'
 												disabled={!this.state.isValid}
+												required
 											/>
 
 											<MainTextField
