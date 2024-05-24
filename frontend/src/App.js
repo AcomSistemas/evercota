@@ -125,7 +125,7 @@ class App extends React.Component {
 		}
 	}
 
-	calculateUnitValue = (newData = null) => {	// Divide o "Valor da Embalagem" pela "Qtd. Embalagem" e coloca o resultado em "Valor Unitário"
+	calculateUnitValue = (newData = null, currentRow = null) => {	// Divide o "Valor da Embalagem" pela "Qtd. Embalagem" e coloca o resultado em "Valor Unitário"
 		var mapData = newData ?? this.state.data.itens
 
 		const updatedData = mapData.map(item => {
@@ -145,7 +145,13 @@ class App extends React.Component {
 				itens: updatedData
 			},
 			isLoading: false
-		}))
+		}), ()=> {
+			if (currentRow) {
+				currentRow.click()
+				currentRow.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
+				currentRow.focus()
+			}
+		})
 	}
 
 	cancelQuote = () => {
@@ -187,8 +193,8 @@ class App extends React.Component {
 			if (r.status && r.data) {
 
 				const datetimeNow = new Date()
-				const isValid = new Date(r.data.dh_cotacao_encerramento) > datetimeNow && r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
-				// const isValid = r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
+				// const isValid = new Date(r.data.dh_cotacao_encerramento) > datetimeNow && r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
+				const isValid = r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
 
 				let horario_encerramento
 
@@ -227,10 +233,10 @@ class App extends React.Component {
 		}
 	}
 
-	onTableEdit = (row, method, extraParam) => {
+	onTableEdit = (row, method, extraParam, currentRow) => {
 		if (method === 'edit') {
 			this.setState({ isLoading: true}, 
-				() =>  this.calculateUnitValue(row))
+				() =>  this.calculateUnitValue(row, currentRow))
 		}
 	}
 

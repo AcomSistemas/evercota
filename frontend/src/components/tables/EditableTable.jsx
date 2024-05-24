@@ -274,6 +274,7 @@ class EditableTable extends React.Component {
 
                     
                     if (nextCell) {
+                        this.setState({currentRow: nextCell})
                         nextCell.click()
                         nextCell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
                         nextCell.focus()
@@ -324,7 +325,8 @@ class EditableTable extends React.Component {
     }
 
     setRowsCallback = (rows, method, extraParam = null) => {
-        this.props.onEditRow(rows, method, extraParam)
+        console.log(this.state.currentRow)
+        this.props.onEditRow(rows, method, extraParam, this.state.currentRow)
     }
 
     setRowModesModel = (models) => {
