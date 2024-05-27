@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {forwardRef} from 'react';
 
 import _ from 'lodash';
 
@@ -315,6 +315,26 @@ class EditableTable extends React.Component {
         }, 100)
     }
 
+    focusNextCell = (id) => {
+        const currentRowIndex = this.state.rows.findIndex(row => row.id_item === id)
+        const nextRowIndex = currentRowIndex + 1
+        if (nextRowIndex < this.state.rows.length) {
+            setTimeout(() => {
+                console.log('timeout')
+                const nextRow = this.state.rows[nextRowIndex]
+                const row = document.querySelector(`[data-id='${nextRow.id_item}']`)
+                const nextCell = row.querySelector(`[data-field='qt_embalagem_fornecedor']`)
+                if (nextCell) {
+                    this.setState({ currentRow: nextCell })
+                    nextCell.click()
+                    nextCell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
+                    nextCell.focus()
+                }
+            }, 100)
+        }
+        
+    }
+
     handleKeyDown = (params, event) => {
         if (event.key === 'Enter') {
             event.preventDefault()
@@ -339,19 +359,6 @@ class EditableTable extends React.Component {
                 // Save the current row and move to the first field of the next row
                 const nextRowIndex = currentRowIndex + 1;
                 this.setState({}, () => this.handleSaveClick2(params.id))
-                if (nextRowIndex < this.state.rows.length) {
-                    const nextRow = this.state.rows[nextRowIndex]
-                    const row = document.querySelector(`[data-id='${nextRow.id_item}']`)
-                    const nextCell = row.querySelector(`[data-field='qt_embalagem_fornecedor']`)
-
-
-                    if (nextCell) {
-                        this.setState({ currentRow: nextCell })
-                        nextCell.click()
-                        nextCell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
-                        nextCell.focus()
-                    }
-                }
             }
         }
     }
@@ -375,7 +382,7 @@ class EditableTable extends React.Component {
     handleSaveClick2 = (id) => {
         this.setState({
             rowModesModel: { ...this.state.rowModesModel, [id]: { mode: GridRowModes.View } },
-        })
+        }, ()=>console.log('saveclick'))
     }
 
     onPageChange = (newPage) => {
@@ -397,8 +404,8 @@ class EditableTable extends React.Component {
     }
 
     setRowsCallback = (rows, method, extraParam = null) => {
-        console.log(this.state.currentRow)
         this.props.onEditRow(rows, method, extraParam, this.state.currentRow)
+        this.focusNextCell(extraParam.id_item)
     }
 
     setRowModesModel = (models) => {
@@ -547,7 +554,7 @@ class EditableTable extends React.Component {
                     backgroundColor='transparent' // BackgroundColor da EditableTable
                 >
                     <LocalizationProvider dateAdapter={AdapterDayjs} theme={theme}>
-
+                        
                         <DataGrid
                             paginationMode="server"
                             editMode="row"
@@ -598,4 +605,8 @@ class EditableTable extends React.Component {
     }
 }
 
-export default EditableTable
+const ForwardedEditableTable = forwardRef((props, ref) => {
+    return <EditableTable {...props} innerRef={ref} />
+})
+
+export default ForwardedEditableTable

@@ -15,6 +15,7 @@ import banner from "./data/banner.png";
 
 import { Box, Typography } from "@mui/material";
 import { defaultRequest } from "./utils/request/request";
+import { handleChangeText } from "./utils/handleChange";
 import { tokens } from "./typograhpy";
 import { useMode } from "./typograhpy";
 
@@ -204,6 +205,8 @@ class App extends React.Component {
 					horario_encerramento = null
 				}
 
+				r.data.itens = r.data.itens ? r.data.itens.sort((a, b) => a['id_item'] - b['id_item']) : r.data.itens
+
 				this.setState({
 					horario_encerramento: horario_encerramento,
 
@@ -228,16 +231,7 @@ class App extends React.Component {
 	}
 
 	handleChangeText = (event) => {
-		if (event.target.id === 'paymentType') {
-			this.setState({ [event.target.id]: event.target.value })
-		} else {
-			this.setState(prevState => ({
-				data: {
-					...prevState.data,
-					[event.target.id]: event.target.value
-				}
-			}))
-		}
+		handleChangeText(this.state.data, event.target.id, event.target.value, () => this.setState({ menuId: '12' }))
 	}
 
 	onTableEdit = (row, method, extraParam, currentRow) => {
@@ -254,7 +248,7 @@ class App extends React.Component {
 
 			if (!this.state.data.nr_dias_prazo_entrega ||
 				!this.state.data.nr_dias_prazo_pagamento ||
-				!this.state.paymentType
+				!this.state.data.paymentType
 			) {
 				this.setState({
 					alertMessage: 'Preencha todos os campos obrigatórios (*)',
@@ -279,7 +273,9 @@ class App extends React.Component {
 					alertMessage: 'Cotação gravada com sucesso',
 					alertType: 'success',
 					showAlert: true,
-				}, () => window.location.reload())
+				}, () => {
+					// window.location.reload()
+				})
 			} else {
 				this.setState({
 					alertMessage: 'Não foi possível gerar a cotação, tente mais tarde sem fechar esta página',
@@ -556,7 +552,7 @@ class App extends React.Component {
 											<MainSelectInput
 												{...this.props}
 												id='paymentType'
-												value={this.state.paymentType || ''}
+												value={this.state.data.paymentType || ''}
 												optionsList={this.state.paymentList}
 												label='Forma de Pagamento'
 												handleChange={this.handleChangeText}
