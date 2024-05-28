@@ -15,7 +15,6 @@ import banner from "./data/banner.png";
 
 import { Box, Typography } from "@mui/material";
 import { defaultRequest } from "./utils/request/request";
-import { handleChangeText } from "./utils/handleChange";
 import { tokens } from "./typograhpy";
 import { useMode } from "./typograhpy";
 
@@ -170,6 +169,8 @@ class App extends React.Component {
 					alertMessage: 'Cotação cancelada com sucesso',
 					alertType: 'success',
 					showAlert: true,
+				}, () => {
+					window.location.reload()
 				})
 			} else {
 				this.setState({
@@ -231,7 +232,20 @@ class App extends React.Component {
 	}
 
 	handleChangeText = (event) => {
-		handleChangeText(this.state.data, event.target.id, event.target.value, () => this.setState({ menuId: '12' }))
+		// Limita o maxLength para 4
+		var newValue
+		if (event.target.id === 'cd_condicaovendacompra') {
+			newValue = event.target.value
+		} else {
+			newValue = event.target.value.slice(0, 4)
+		}
+
+		this.setState(prevState => ({
+			data: {
+				...prevState.data,
+				[event.target.id]: newValue
+			}
+		}))
 	}
 
 	onTableEdit = (row, method, extraParam, currentRow) => {
@@ -246,7 +260,8 @@ class App extends React.Component {
 			this.state.data.qt_embalagem = this.state.data.qt_embalagem || 0
 			this.state.data.vl_embalagem = this.state.data.vl_embalagem || 0
 
-			if (
+			if (!this.state.data.nr_dias_prazo_entrega ||
+				!this.state.data.nr_dias_prazo_pagamento ||
 				!this.state.data.cd_condicaovendacompra
 			) {
 				this.setState({
@@ -263,7 +278,8 @@ class App extends React.Component {
 			method: 'put'
 		}
 		let form = {
-			'CotacaoPrecoFornecedor': this.state.data
+			...this.state.data,
+			dh_preenchimento: null
 		}
 		defaultRequest(config, form).then((r) => {
 			if (r.status) {
@@ -273,7 +289,7 @@ class App extends React.Component {
 					alertType: 'success',
 					showAlert: true,
 				}, () => {
-					// window.location.reload()
+					window.location.reload()
 				})
 			} else {
 				this.setState({

@@ -210,8 +210,8 @@ class EditableTable extends React.Component {
                                 }}
                                 value={value}
                                 onChange={(event) => {
-                                    const newValue = event.target.value;
-                                    params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue }, event);
+                                    const newValue = event.target.value.toUpperCase()
+                                    params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue }, event)
                                 }}
                                 inputProps={{
                                     maxLength: 30
