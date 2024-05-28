@@ -194,8 +194,8 @@ class App extends React.Component {
 			if (r.status && r.data) {
 
 				const datetimeNow = new Date()
-				// const isValid = new Date(r.data.dh_cotacao_encerramento) > datetimeNow && r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
-				const isValid = r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
+				const isValid = new Date(r.data.dh_cotacao_encerramento) > datetimeNow && r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
+				// const isValid = r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
 
 				let horario_encerramento
 
@@ -246,9 +246,8 @@ class App extends React.Component {
 			this.state.data.qt_embalagem = this.state.data.qt_embalagem || 0
 			this.state.data.vl_embalagem = this.state.data.vl_embalagem || 0
 
-			if (!this.state.data.nr_dias_prazo_entrega ||
-				!this.state.data.nr_dias_prazo_pagamento ||
-				!this.state.data.paymentType
+			if (
+				!this.state.data.cd_condicaovendacompra
 			) {
 				this.setState({
 					alertMessage: 'Preencha todos os campos obrigatórios (*)',
@@ -551,8 +550,8 @@ class App extends React.Component {
 
 											<MainSelectInput
 												{...this.props}
-												id='paymentType'
-												value={this.state.data.paymentType || ''}
+												id='cd_condicaovendacompra'
+												value={this.state.data.cd_condicaovendacompra || ''}
 												optionsList={this.state.paymentList}
 												label='Forma de Pagamento'
 												handleChange={this.handleChangeText}
