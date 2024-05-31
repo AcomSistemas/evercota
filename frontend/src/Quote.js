@@ -271,7 +271,7 @@ class App extends React.Component {
 		data?.itens?.map((value, index) => {
 			console.log(value)
 			value.marca = value.marca?.toUpperCase()
-			value.qt_atendida = value.qt_embalagem ?? 0
+			value.qt_atendida = value.qt_embalagem_fornecedor ?? 0
 		})
 
 		let config = {
