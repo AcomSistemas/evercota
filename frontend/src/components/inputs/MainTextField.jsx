@@ -72,6 +72,7 @@ class MainTextField extends React.Component {
                     }}
                     onKeyUp={this.props.onKeyUp ?? null}
                     inputRef={this.props.innerRef ?? undefined}
+                    onFocus={(params) => this.props.onFocus ? this.props.onFocus(params) : null}
                     id={this.props.id ?? undefined}
                     variant={'outlined'}
                     type={this.props.type === 'number' ? 'number' : this.props.type === 'password' && !this.state.showPassword ? 'password' : 'text'}

@@ -75,6 +75,12 @@ class App extends React.Component {
 
 			dataItensTotalSize: '',
 		}
+		this.deliveryTermRef = React.createRef()
+		this.paymentTermRef = React.createRef()
+		this.paymentTypeRef = React.createRef()
+		this.buttonRef = React.createRef()
+		this.tableRef = React.createRef()
+
 		dayjs.locale('pt-br')
 	}
 
@@ -244,6 +250,37 @@ class App extends React.Component {
 		}))
 	}
 
+	handleKeyUp = (event) => {
+		if (event.key === "Enter") {
+			this.moveToNextInput()
+		}
+	}
+
+	moveToNextInput = () => {
+		document.activeElement.blur()
+		switch (this.state.focusedInput) {
+			case 'nr_dias_prazo_entrega':
+				this.paymentTermRef.current.focus()
+				this.setState({ focusedInput: 'nr_dias_prazo_pagamento' })
+				break
+			case 'nr_dias_prazo_pagamento':
+				this.paymentTypeRef.current.focus()
+				this.setState({ focusedInput: 'cd_condicaovendacompra' })
+				break
+			case 'cd_condicaovendacompra':
+				this.buttonRef.current.focus()
+				this.setState({ focusedInput: 'buttonRef' }, () => console.log(this.state.focusedInput))
+				break
+		}
+	}
+
+	onInputFocus = (params) => {
+		this.setState({
+			focusedInput: params.target.id,
+		})
+		// params.target.select() // seleciona todo o conteúdo quando em foco (ctrl + A)
+	}
+
 	onTableEdit = (row, method, extraParam, currentRow) => {
 		if (method === 'edit') {
 			this.setState({ isLoading: true },
@@ -352,7 +389,7 @@ class App extends React.Component {
 								<Box className='logo'><img src={logo} alt="EverCota"></img></Box>
 							</Box>
 							<Box className='navbar-infos'>
-								<Typography sx={{ fontSize: '12px' }}>{this.state.data?.razao_fornecedor} | {this.state.data.cpf_cnpj_Fornecedor ? `CNPJ ${this.state.data.cpf_cnpj_Fornecedor}` : ''}</Typography>
+								<Typography sx={{ fontSize: '12px' }}>{this.state.data?.razao_fornecedor}{this.state.data.cpf_cnpj_Fornecedor ? ` | CNPJ ${this.state.data.cpf_cnpj_Fornecedor}` : ''}</Typography>
 								<Typography sx={{ fontSize: '12px' }}>{this.state.data?.fantasia_Fornecedor}</Typography>
 							</Box>
 						</div>
@@ -448,7 +485,7 @@ class App extends React.Component {
 										/>
 
 										<Box></Box>
-										
+
 										{this.state.isValid ?
 											<MainButton
 												{...this.props}
@@ -468,6 +505,7 @@ class App extends React.Component {
 
 									<EditableTable
 										{...this.props}
+										ref={this.tableRef}
 										allowEdit
 										allowEditOnRow
 										noAddRow
@@ -545,6 +583,7 @@ class App extends React.Component {
 
 											<MainTextField
 												{...this.props}
+												ref={this.deliveryTermRef}
 												id='nr_dias_prazo_entrega'
 												value={this.state.data.nr_dias_prazo_entrega || ''}
 												label='Prazo de Entrega (dias)'
@@ -553,10 +592,14 @@ class App extends React.Component {
 												width='100%'
 												type='number'
 												disabled={!this.state.isValid}
+												isFocused={this.state.focusedInput === 'nr_dias_prazo_entrega'}
+												onFocus={this.onInputFocus}
+												required
 											/>
 
 											<MainTextField
 												{...this.props}
+												ref={this.paymentTermRef}
 												id='nr_dias_prazo_pagamento'
 												value={this.state.data.nr_dias_prazo_pagamento || ''}
 												label='Prazo de Pagamento (dias)'
@@ -565,10 +608,14 @@ class App extends React.Component {
 												width='100%'
 												type='number'
 												disabled={!this.state.isValid}
+												isFocused={this.state.focusedInput === 'nr_dias_prazo_pagamento'}
+												onFocus={this.onInputFocus}
+												required
 											/>
 
 											<MainSelectInput
 												{...this.props}
+												ref={this.paymentTypeRef}
 												id='cd_condicaovendacompra'
 												value={this.state.data.cd_condicaovendacompra || ''}
 												optionsList={this.state.paymentList}
@@ -577,6 +624,8 @@ class App extends React.Component {
 												onKeyUp={this.handleKeyUp}
 												width='100%'
 												disabled={!this.state.isValid}
+												isFocused={this.state.focusedInput === 'cd_condicaovendacompra'}
+												onFocus={this.onInputFocus}
 												required
 											/>
 
@@ -606,6 +655,10 @@ class App extends React.Component {
 											{this.state.isValid ?
 												<MainButton
 													{...this.props}
+													id="buttonRef"
+													ref={this.buttonRef}
+													isFocused={this.state.focusedInput === 'buttonRef'}
+													onFocus={this.onInputFocus}
 													sx={{
 														backgroundColor: 'orange',
 														borderRadius: '8px'

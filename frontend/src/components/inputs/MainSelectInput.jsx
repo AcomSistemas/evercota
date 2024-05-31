@@ -46,7 +46,7 @@ class MainSelectInput extends React.Component {
                         // },
                         '& .MuiOutlinedInput-root': {
                             '&.Mui-focused fieldset': {
-                                borderColor: this.props.isFocused ? 'orange' : this.props.colors.grey[500], // borda do input quando está selecionado
+                                borderColor: this.props.colors.grey[500], // borda do input quando está selecionado
                             },
                         },
                         '& .MuiInputBase-input': {
@@ -61,7 +61,7 @@ class MainSelectInput extends React.Component {
                             paddingLeft: '10px'
                         },
                         '& fieldset': {
-                            borderColor: this.props.isFocused ? 'orange' : this.props.colors.grey[800], // borda do input
+                            borderColor: this.props.colors.grey[800], // borda do input
                             boxShadow: 'inset 0 6px 5px -5px #888888',
                         },
                         '& .MuiSvgIcon-root': {
