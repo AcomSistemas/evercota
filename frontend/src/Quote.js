@@ -252,14 +252,12 @@ class App extends React.Component {
 	}
 
 	sendQuote = () => {
-		if (this.state.data) {
-			this.state.data.qt_embalagem = this.state.data.qt_embalagem || 0
-			this.state.data.vl_embalagem = this.state.data.vl_embalagem || 0
+		const data = this.state.data
+		if (data) {
+			data.qt_embalagem = data.qt_embalagem || 0
+			data.vl_embalagem = data.vl_embalagem || 0
 
-			if (!this.state.data.nr_dias_prazo_entrega ||
-				!this.state.data.nr_dias_prazo_pagamento ||
-				!this.state.data.cd_condicaovendacompra
-			) {
+			if (!data.cd_condicaovendacompra) {
 				this.setState({
 					alertMessage: 'Preencha todos os campos obrigatórios (*)',
 					alertType: 'error',
@@ -269,12 +267,18 @@ class App extends React.Component {
 				return
 			}
 		}
+
+		data?.itens?.map((value, index) => {
+			console.log(value)
+			value.marca = value.marca?.toUpperCase()
+		})
+		
 		let config = {
 			endpoint: 'cota/cotacaoprecofornecedor/' + this.state.quoteId + '?x-Entidade=' + this.state.entity,
 			method: 'put'
 		}
 		let form = {
-			...this.state.data,
+			...data,
 			dh_preenchimento: null
 		}
 		defaultRequest(config, form).then((r) => {
@@ -548,7 +552,6 @@ class App extends React.Component {
 												width='100%'
 												type='number'
 												disabled={!this.state.isValid}
-												required
 											/>
 
 											<MainTextField
@@ -561,7 +564,6 @@ class App extends React.Component {
 												width='100%'
 												type='number'
 												disabled={!this.state.isValid}
-												required
 											/>
 
 											<MainSelectInput

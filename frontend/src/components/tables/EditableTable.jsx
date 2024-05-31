@@ -180,49 +180,7 @@ class EditableTable extends React.Component {
                     }
                 }
                 else if (type === 'text') {
-                    column['renderEditCell'] = (params) => {
-                        // Assegura que params.value é uma string, mesmo que o valor seja nulo
-                        const value = params.value ? params.value.toString().toUpperCase() : '';
-                        return (
-                            <TextField
-                                sx={{
-                                    fontSize: '10px',
-                                    backgroundColor: 'transparent',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    '& .MuiInputBase-root': {
-                                        fontSize: '14px',
-                                    },
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: 'transparent', // Remove a borda quando não está em foco
-                                            borderWidth: '1px', // Pode ajustar a espessura da borda
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: 'transparent', // Bordas em hover, ajuste a cor conforme necessário
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: 'transparent', // Cor da borda quando focado, ajuste conforme necessário
-                                            borderWidth: '2px', // Aumenta a borda quando focado
-                                        },
-                                    },
-                                }}
-                                value={value}
-                                onChange={(event) => {
-                                    const newValue = event.target.value.toUpperCase()
-                                    params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue }, event)
-                                }}
-                                inputProps={{
-                                    maxLength: 30
-                                }}
-                                fullWidth
-                                variant="outlined"
-                                autoFocus
-                                inputRef={input => input && input.focus()}
-                            />
-                        );
-                    };
+                    
                     column['renderCell'] = (params) => (
                         params.value ? params.value.toString().toUpperCase() : ''
                     )
@@ -320,7 +278,6 @@ class EditableTable extends React.Component {
         const nextRowIndex = currentRowIndex + 1
         if (nextRowIndex < this.state.rows.length) {
             setTimeout(() => {
-                console.log('timeout')
                 const nextRow = this.state.rows[nextRowIndex]
                 const row = document.querySelector(`[data-id='${nextRow.id_item}']`)
                 const nextCell = row.querySelector(`[data-field='qt_embalagem_fornecedor']`)
@@ -376,13 +333,15 @@ class EditableTable extends React.Component {
     handleSaveClick = (id) => () => {
         this.setState({
             rowModesModel: { ...this.state.rowModesModel, [id]: { mode: GridRowModes.View } },
+            buttonMode: true // Clicou no botao de salvar, logo n vai para proxima linha
         })
     }
 
     handleSaveClick2 = (id) => {
         this.setState({
             rowModesModel: { ...this.state.rowModesModel, [id]: { mode: GridRowModes.View } },
-        }, ()=>console.log('saveclick'))
+            buttonMode: false // Clicou no salvar com o enter, logo vai para proxima linha
+        })
     }
 
     onPageChange = (newPage) => {
@@ -405,7 +364,9 @@ class EditableTable extends React.Component {
 
     setRowsCallback = (rows, method, extraParam = null) => {
         this.props.onEditRow(rows, method, extraParam, this.state.currentRow)
-        this.focusNextCell(extraParam.id_item)
+        if(!this.state.buttonMode) {
+            this.focusNextCell(extraParam.id_item)
+        }
     }
 
     setRowModesModel = (models) => {
