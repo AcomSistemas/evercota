@@ -289,7 +289,7 @@ class App extends React.Component {
 	}
 
 	sendQuote = () => {
-		const data = this.state.data;
+		const data = this.state.data
 
 		if (data.itens && Array.isArray(data.itens)) {
 			data.itens.forEach(item => {
@@ -301,7 +301,10 @@ class App extends React.Component {
 				}
 			})
 
-			if (!data.cd_condicaovendacompra) {
+			if (!data.cd_condicaovendacompra ||
+				!data.nr_dias_prazo_entrega ||
+				!data.nr_dias_prazo_pagamento
+			) {
 				this.setState({
 					alertMessage: 'Preencha todos os campos obrigatórios (*)',
 					alertType: 'error',
