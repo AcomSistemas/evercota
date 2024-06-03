@@ -300,23 +300,9 @@ class App extends React.Component {
 					item.vl_embalagem = 0
 				}
 			})
-
-			if (!data.cd_condicaovendacompra ||
-				!data.nr_dias_prazo_entrega ||
-				!data.nr_dias_prazo_pagamento
-			) {
-				this.setState({
-					alertMessage: 'Preencha todos os campos obrigatórios (*)',
-					alertType: 'error',
-					showAlert: true,
-					isConfirmDialogOpen: false
-				})
-				return
-			}
 		}
 
 		data?.itens?.map((value, index) => {
-			console.log(value)
 			value.marca = value.marca?.toUpperCase()
 			value.qt_atendida = value.qt_embalagem_fornecedor ?? 0
 		})
@@ -604,7 +590,6 @@ class App extends React.Component {
 												disabled={!this.state.isValid}
 												isFocused={this.state.focusedInput === 'nr_dias_prazo_entrega'}
 												onFocus={this.onInputFocus}
-												required
 											/>
 
 											<MainTextField
@@ -620,7 +605,6 @@ class App extends React.Component {
 												disabled={!this.state.isValid}
 												isFocused={this.state.focusedInput === 'nr_dias_prazo_pagamento'}
 												onFocus={this.onInputFocus}
-												required
 											/>
 
 											<MainSelectInput
@@ -636,7 +620,6 @@ class App extends React.Component {
 												disabled={!this.state.isValid}
 												isFocused={this.state.focusedInput === 'cd_condicaovendacompra'}
 												onFocus={this.onInputFocus}
-												required
 											/>
 
 											<MainTextField
