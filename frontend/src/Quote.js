@@ -197,8 +197,8 @@ class App extends React.Component {
 			if (r.status && r.data) {
 
 				const datetimeNow = new Date()
-				const isValid = new Date(r.data.dh_cotacao_encerramento) > datetimeNow && r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
-				// const isValid = r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
+				// const isValid = new Date(r.data.dh_cotacao_encerramento) > datetimeNow && r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
+				const isValid = r.data.at_situacao_cotacao === 759 && r.data.at_situacao === 1
 
 				let horario_encerramento
 
@@ -289,10 +289,17 @@ class App extends React.Component {
 	}
 
 	sendQuote = () => {
-		const data = this.state.data
-		if (data) {
-			data.qt_embalagem = data.qt_embalagem || 0
-			data.vl_embalagem = data.vl_embalagem || 0
+		const data = this.state.data;
+
+		if (data.itens && Array.isArray(data.itens)) {
+			data.itens.forEach(item => {
+				if (!item.qt_embalagem_fornecedor) {
+					item.qt_embalagem_fornecedor = 0
+				}
+				if (!item.vl_embalagem) {
+					item.vl_embalagem = 0
+				}
+			})
 
 			if (!data.cd_condicaovendacompra) {
 				this.setState({
