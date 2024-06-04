@@ -125,7 +125,20 @@ class App extends React.Component {
 				}
 			}
 		}
+
+		if (this.props.quoteId === '666') {
+			this.changeFavicon('easter.ico')
+		}
 	}
+
+	changeFavicon = (iconURL) => {
+        let link = document.querySelector("link[rel*='icon']") || document.createElement('link')
+        link.type = 'image/x-icon'
+        link.rel = 'shortcut icon'
+        link.href = iconURL
+        document.getElementsByTagName('head')[0].appendChild(link)
+		console.log(link)
+    }
 
 	calculateUnitValue = (newData = null, currentRow = null) => {	// Divide o "Valor da Embalagem" pela "Qtd. Embalagem" e coloca o resultado em "Valor Unitário"
 		var mapData = newData ?? this.state.data.itens
