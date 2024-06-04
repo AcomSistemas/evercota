@@ -37,6 +37,9 @@ class MainSelectInput extends React.Component {
                 <FormControl
                     size={this.props.size ?? 'small'}
                     sx={{
+                        '& .MuiOutlinedInput-input.Mui-disabled': {
+                            paddingLeft: '10px !important',
+                        },
                         '& .MuiInputBase-root': {
                             fontSize: '16px', // Tamanho da fonte da label
                             borderRadius: '25px',
