@@ -65,6 +65,11 @@ class MainTextField extends React.Component {
                         input: { // Propriedades do Input
                             color: this.props.colors.grey[100],
                             borderRadius: '25px',
+                            textAlign: this.props.type === 'number' ? 'right' : 'left',
+                            '&::-webkit-inner-spin-button': {
+                                // '-webkit-appearance': 'none', // desabilita as flechas
+                                marginLeft: '5px', // margin das flechas
+                            },
                         },
                         width: this.props.width ? this.props.width : this.props.fullWidth ? '97%' : '94%',
                         height: '100%',
@@ -84,10 +89,6 @@ class MainTextField extends React.Component {
                     fullWidth={this.props.fullWidth ? true : false}
                     placeholder={this.props.placeholder ?? ''}
                     onBlur={this.props.onBlur ?? null}
-                    inputProps={{
-                        maxLength: this.props.maxLength ?? undefined,
-                    }}
-
                     InputLabelProps={{
                         shrink: false
                     }}
@@ -109,12 +110,12 @@ class MainTextField extends React.Component {
                     }}
                     onChange={(e) => {
                         if (this.props.type === 'number') {  // Verificação aplicada somente para campos numéricos
-                            const value = parseInt(e.target.value, 10);
+                            const value = parseInt(e.target.value, 10)
                             if (value < 0) {
-                                e.target.value = 0;  // Ajusta para 0 se o valor for negativo
+                                e.target.value = 0  // Ajusta para 0 se o valor for negativo
                             }
                         }
-                        this.props.handleChange(e);
+                        this.props.handleChange(e)
                     }}
                 />
             </Box>

@@ -27,11 +27,11 @@ import './App.css';
 function withHooks(WrappedComponent) {
 	return function (props) {
 		const { entity, quoteId } = useParams()
-		const [theme, colorMode] = useMode()
-		const colors = tokens(theme.palette.mode)
+		const [theme] = useMode()
+        const colors = tokens()
 
 		return (
-			<WrappedComponent colors={colors} colorMode={colorMode} theme={theme} {...props} entity={entity} quoteId={quoteId} />
+			<WrappedComponent colors={colors} theme={theme} {...props} entity={entity} quoteId={quoteId} />
 		)
 	}
 }
@@ -66,7 +66,7 @@ class App extends React.Component {
 				['ds_item', 'Descrição'],
 				['sg_unidademedida', 'UM'],
 				['qt_cotacao', 'Qtd. Cotação'],
-				['qt_embalagem_fornecedor', 'Qtd. Embalagem'],
+				['qt_embalagem_fornecedor', 'Qtd. por Embalagem'],
 				['vl_embalagem', 'Valor Embalagem'],
 				['vl_unitario', 'Valor Unitário'],
 				['marca_desejada', 'Marca Desejada'],
@@ -117,12 +117,10 @@ class App extends React.Component {
 		}
 
 		if (this.state.totalQuoteValue !== prevState.totalQuoteValue) {
-			const numericValue = parseFloat(this.state.totalQuoteValue.toString().replace(',', '.'))
-			if (!isNaN(numericValue)) {
-				const formattedValue = numericValue.toFixed(2).replace('.', ',')
-				if (formattedValue !== this.state.totalQuoteValue) {
-					this.setState({ totalQuoteValue: formattedValue })
-				}
+			const numericValue = this.state.totalQuoteValue
+
+			if (numericValue !== prevState.totalQuoteValue) {
+				this.setState({ totalQuoteValue: numericValue })
 			}
 		}
 	}
@@ -335,18 +333,25 @@ class App extends React.Component {
 		})
 	}
 
-	sumOfTablePackingValue = () => {    // Soma de todos os valores da coluna 'Valor Embalagem'
+	sumOfTablePackingValue = () => {    // Soma de todos os valores de (qt_cotacao * vl_unitario)
 		const { data } = this.state
 		let sum = 0
+		let result = 0
+		let qt_cotacao = 0
+		let vl_unitario = 0
 
 		if (data && data.itens && data.itens.length > 0) {
 			for (let item of data.itens) {
-				sum += item.vl_embalagem ? parseFloat(item.vl_embalagem) : 0
+				qt_cotacao = item.qt_cotacao ? parseFloat(item.qt_cotacao) : 0
+				vl_unitario = item.vl_unitario ? parseFloat(item.vl_unitario) : 0
+				result = qt_cotacao * vl_unitario
+
+				sum += result ? result : 0
 			}
 		} else {
 			sum = 0
 		}
-		this.setState({ totalQuoteValue: sum })
+		this.setState({ totalQuoteValue: sum.toFixed(2) })
 	}
 
 
@@ -432,7 +437,7 @@ class App extends React.Component {
 											alignItems: 'center',
 											gridTemplateColumns: {
 												sm: '1fr',
-												md: '1fr 1fr 1fr 1fr 1fr 0.9fr',
+												md: '0.6fr 0.6fr 0.6fr 0.6fr 1.6fr 0.7fr',
 											},
 										}}
 									>
@@ -477,6 +482,7 @@ class App extends React.Component {
 											handleChange={this.handleChangeText}
 											onKeyUp={this.handleKeyUp}
 											width='100%'
+											type='number'
 											disabled='true'
 										/>
 
@@ -539,14 +545,14 @@ class App extends React.Component {
 													'disabled': true
 												},
 												'vl_embalagem': this.state.isValid ? {
-													'type': 'currency',
+													'type': 'currencyTwoDecimals',
 													'borders': true,
 												} : {
-													'type': 'currency',
+													'type': 'currencyTwoDecimals',
 													'disabled': true
 												},
 												'vl_unitario': {
-													'type': 'currency',
+													'type': 'currencyFourDecimals',
 													'disabled': true
 												},
 												'marca_desejada': {
@@ -571,7 +577,7 @@ class App extends React.Component {
 												alignItems: 'end',
 												gridTemplateColumns: {
 													sm: '1fr',
-													md: '0.7fr 0.7fr 1.3fr 0.7fr 0.7fr 0.5fr 0.9fr',
+													md: '0.6fr 0.6fr 1fr 0.6fr 0.6fr 0.5fr 0.7fr',
 												},
 												marginTop: '10px'
 											}}
@@ -630,6 +636,7 @@ class App extends React.Component {
 												handleChange={this.handleChangeText}
 												onKeyUp={this.handleKeyUp}
 												width='100%'
+												type='number'
 												disabled='true'
 											/>
 
@@ -641,6 +648,7 @@ class App extends React.Component {
 												handleChange={this.handleChangeText}
 												onKeyUp={this.handleKeyUp}
 												width='100%'
+												type='number'
 												disabled='true'
 											/>
 

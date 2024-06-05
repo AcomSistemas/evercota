@@ -1,4 +1,4 @@
-import React, {forwardRef} from 'react';
+import React, { forwardRef } from 'react';
 
 import _ from 'lodash';
 
@@ -25,10 +25,10 @@ class CurrencyEditInput extends React.Component {
     }
 
     handleChange = (event) => {
-        const { maxDigits } = this.props
+        const { maxDigits, maxDecimals } = this.props
         const newValue = event.target.value
-        // Colocar máximo de dígitos com base no maxDigits
-        const regex = new RegExp(`^\\d{0,${maxDigits}}(,\\d{0,4})?$`)
+        // Colocar máximo de dígitos antes e depois da vírgula
+        const regex = new RegExp(`^\\d{0,${maxDigits}}(,\\d{0,${maxDecimals}})?$`)
 
         if (newValue.match(regex)) {
             this.setState({ inputValue: newValue })
@@ -150,8 +150,8 @@ class EditableTable extends React.Component {
                 headerName: value[1].toUpperCase(),
                 cellClassName: value[0] + '-column--cell' + (this.props.extraColumnsConfig?.[value[0]]?.disabled ? ' disabled' : '') + (this.props.extraColumnsConfig?.[value[0]]?.borders ? ' borders' : ''),
                 flex: 1,
-                headerAlign: 'center',
-                align: 'center', // align: value[0] === this.props.id ? 'start' : 'center', 
+                headerAlign: 'left',
+                align: 'left',
                 editable: this.props.allowEditOnRow && !(this.props.extraColumnsConfig?.[value[0]]?.disabled),
             }
             if (this.props.extraColumnsConfig && value[0] in this.props.extraColumnsConfig) {
@@ -159,8 +159,9 @@ class EditableTable extends React.Component {
 
                 if (type === 'number') {
                     column['type'] = 'number'
-                    column['maxDigits'] = 5
-                    column['renderEditCell'] = (params) => <CurrencyEditInput {...params} maxDigits={column['maxDigits']} />
+                    column['align'] = 'right'
+                    column['headerAlign'] = 'right'
+                    column['renderEditCell'] = (params) => <CurrencyEditInput {...params} maxDigits={5} maxDecimals={4} />
                     column['renderCell'] = (params) => {
                         if (params.value !== null) {
                             let adjustedValue = params.value > 99999 ? 99999 : params.value
@@ -168,10 +169,23 @@ class EditableTable extends React.Component {
                         }
                     }
                 }
-                else if (type === 'currency') {
+                else if (type === 'currencyTwoDecimals') {
                     column['type'] = 'number'
-                    column['maxDigits'] = 5
-                    column['renderEditCell'] = (params) => <CurrencyEditInput {...params} maxDigits={column['maxDigits']} />
+                    column['align'] = 'right'
+                    column['headerAlign'] = 'right'
+                    column['renderEditCell'] = (params) => <CurrencyEditInput {...params} maxDigits={5} maxDecimals={2} />
+                    column['renderCell'] = (params) => {
+                        if (params.value !== null) {
+                            let adjustedValue = params.value > 99999 ? 99999 : params.value
+                            return `R$ ${adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        }
+                    }
+                }
+                else if (type === 'currencyFourDecimals') {
+                    column['type'] = 'number'
+                    column['align'] = 'right'
+                    column['headerAlign'] = 'right'
+                    column['renderEditCell'] = (params) => <CurrencyEditInput {...params} maxDigits={5} maxDecimals={4} />
                     column['renderCell'] = (params) => {
                         if (params.value !== null) {
                             let adjustedValue = params.value > 99999 ? 99999 : params.value
@@ -180,13 +194,10 @@ class EditableTable extends React.Component {
                     }
                 }
                 else if (type === 'text') {
-                    
                     column['renderCell'] = (params) => (
                         params.value ? params.value.toString().toUpperCase() : ''
                     )
                 }
-
-            } else {
             }
 
             if (value[0].split('.').length > 1) {
@@ -289,7 +300,7 @@ class EditableTable extends React.Component {
                 }
             }, 100)
         }
-        
+
     }
 
     handleKeyDown = (params, event) => {
@@ -364,7 +375,7 @@ class EditableTable extends React.Component {
 
     setRowsCallback = (rows, method, extraParam = null) => {
         this.props.onEditRow(rows, method, extraParam, this.state.currentRow)
-        if(!this.state.buttonMode) {
+        if (!this.state.buttonMode) {
             this.focusNextCell(extraParam.id_item)
         }
     }
@@ -515,7 +526,7 @@ class EditableTable extends React.Component {
                     backgroundColor='transparent' // BackgroundColor da EditableTable
                 >
                     <LocalizationProvider dateAdapter={AdapterDayjs} theme={theme}>
-                        
+
                         <DataGrid
                             paginationMode="server"
                             editMode="row"
@@ -565,6 +576,7 @@ class EditableTable extends React.Component {
         )
     }
 }
+
 
 const ForwardedEditableTable = forwardRef((props, ref) => {
     return <EditableTable {...props} innerRef={ref} />

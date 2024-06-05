@@ -49,12 +49,12 @@ class DialogAlert extends React.Component {
                         {this.props.onClose ?
                             <Button
                                 sx={{
-                                    backgroundColor: this.props.colors.blueAccent[100],
+                                    backgroundColor: this.props.colors.redAccent[500],
                                     color: this.props.colors.custom['white'],
                                     width: '60%',
                                     borderRadius: '5px',
                                     textTransform: 'none',
-                                    ":hover": { backgroundColor: this.props.colors.blueAccent[100] },
+                                    ":hover": { backgroundColor: this.props.colors.redAccent[600] },
                                 }}
                                 onClick={this.props.onClose}
                             >Cancelar</Button>
@@ -67,7 +67,7 @@ class DialogAlert extends React.Component {
                                     width: '60%',
                                     borderRadius: '5px',
                                     textTransform: 'none',
-                                    ":hover": { backgroundColor: this.props.colors.blueAccent[100] },
+                                    ":hover": { backgroundColor: this.props.colors.blueAccent[200] },
                                 }}
                                 onClick={this.props.onConfirm}
                             >Ok</Button>
