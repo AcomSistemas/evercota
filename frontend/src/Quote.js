@@ -156,7 +156,7 @@ class App extends React.Component {
 
 	cancelQuote = () => {
 		let config = {
-			endpoint: 'cota/cotacaoprecofornecedor/' + this.state.data.id_cotacaoprecofornecedor,
+			endpoint: 'cota/cotacaoprecofornecedor/' + this.state.quoteId,
 			method: 'delete'
 		}
 		let form = {
