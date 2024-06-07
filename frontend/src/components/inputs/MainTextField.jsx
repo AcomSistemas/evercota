@@ -71,7 +71,7 @@ class MainTextField extends React.Component {
                                 marginLeft: '5px', // margin das flechas
                             },
                         },
-                        width: this.props.width ? this.props.width : this.props.fullWidth ? '97%' : '94%',
+                        width: this.props.width ? this.props.width : '100%',
                         height: '100%',
                         ...this.props.sx,
                     }}

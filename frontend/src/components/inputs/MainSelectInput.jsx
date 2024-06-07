@@ -73,7 +73,7 @@ class MainSelectInput extends React.Component {
                         '& .MuiAutocomplete-input': {
                             color: this.props.colors.grey[100]
                         },
-                        width: this.props.width ? this.props.width : this.props.fullWidth ? '97%' : '94%',
+                        width: this.props.width ? this.props.width : '100%',
                         ...this.props.sx,
                     }}
                 >

@@ -522,20 +522,11 @@ class App extends React.Component {
 										onEditRow={this.onTableEdit}
 										onRowDoubleClick={() => { }}
 										isLoading={this.state.isLoadingTable}
+										editableFields={['qt_embalagem_fornecedor', 'vl_embalagem', 'marca']}
 										extraColumnsConfig={
 											{
-												'cd_item': {
-													'disabled': true,
-												},
-												'ds_item': {
-													'disabled': true
-												},
-												'sg_unidademedida': {
-													'disabled': true
-												},
 												'qt_cotacao': {
 													'type': 'number',
-													'disabled': true,
 												},
 												'qt_embalagem_fornecedor': this.state.isValid ? {
 													'type': 'number',
@@ -553,10 +544,6 @@ class App extends React.Component {
 												},
 												'vl_unitario': {
 													'type': 'currencyFourDecimals',
-													'disabled': true
-												},
-												'marca_desejada': {
-													'disabled': true,
 												},
 												'marca': this.state.isValid ? {
 													'type': 'text',

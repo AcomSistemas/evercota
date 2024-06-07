@@ -1,6 +1,7 @@
 import React, { forwardRef } from 'react';
 
 import _ from 'lodash';
+import dayjs from 'dayjs';
 
 // Icons
 import EditIcon from '@mui/icons-material/Edit';
@@ -10,7 +11,7 @@ import CancelIcon from '@mui/icons-material/Close';
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Box, Button, Stack, TextField } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { getNestedProperty } from '../../utils/helpers';
 import { GridRowModes, DataGrid, GridToolbarContainer, GridActionsCellItem, GridRowEditStopReasons, GridEditInputCell } from '@mui/x-data-grid';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -47,6 +48,35 @@ class CurrencyEditInput extends React.Component {
                 value={this.state.inputValue}
                 onChange={this.handleChange}
                 type="text"
+            />
+        )
+    }
+}
+
+class CustomDatePicker extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            selectedDate: props.value
+        }
+    }
+
+    handleChange = (newValue) => {
+        this.setState({
+            selectedDate: newValue
+        })
+
+        const { id, field, api } = this.props
+        api.setEditCellValue({ id, field, value: newValue })
+    }
+
+    render() {
+        return (
+            <DatePicker
+                value={this.state.selectedDate}
+                onChange={this.handleChange}
+                renderInput={(params) => <TextField {...params} />}
+                format="DD/MM/YYYY"
             />
         )
     }
@@ -95,9 +125,6 @@ class EditToolbar extends React.Component {
 class EditableTable extends React.Component {
     constructor(props) {
         super(props)
-
-        this.editableFields = ['qt_embalagem_fornecedor', 'vl_embalagem', 'marca']
-
         this.state = {
             rows: this.props.data,
             columns: [],
@@ -144,20 +171,37 @@ class EditableTable extends React.Component {
         let columns = []
         let keys = this.props.columns
 
+        const formatDate = (value) => {
+            return dayjs(value).format("DD/MM/YYYY")
+        }
+
         keys.map((value, index) => {
+            const isEditable = this.props.editableFields 
+                                    ? this.props.editableFields.includes(value[0]) && this.props.allowEditOnRow && !(this.props.extraColumnsConfig?.[value[0]]?.disabled)
+                                    : this.props.allowEditOnRow && !(this.props.extraColumnsConfig?.[value[0]]?.disabled)
+
             var column = {
                 field: value[0],
                 headerName: value[1].toUpperCase(),
-                cellClassName: value[0] + '-column--cell' + (this.props.extraColumnsConfig?.[value[0]]?.disabled ? ' disabled' : '') + (this.props.extraColumnsConfig?.[value[0]]?.borders ? ' borders' : ''),
+                cellClassName: value[0] + '-column--cell' + (this.props.editableFields?.includes(value[0]) && !(this.props.extraColumnsConfig?.[value[0]]?.disabled) ? ' borders' : ''),
                 flex: 1,
                 headerAlign: 'left',
                 align: 'left',
-                editable: this.props.allowEditOnRow && !(this.props.extraColumnsConfig?.[value[0]]?.disabled),
+                editable: isEditable
             }
             if (this.props.extraColumnsConfig && value[0] in this.props.extraColumnsConfig) {
                 let type = this.props.extraColumnsConfig[value[0]]['type']
 
-                if (type === 'number') {
+                if (type === 'date') {
+                    column['type'] = 'date'
+                    column['valueFormatter'] = (params) => formatDate(params?.value)
+                    column['renderEditCell'] = (params) => <CustomDatePicker {...params} />
+                } 
+                else if (type === 'select') {
+                    column['type'] = 'singleSelect'
+                    column['valueOptions'] = this.props.extraColumnsConfig[value[0]]['options']
+                } 
+                else if (type === 'number') {
                     column['type'] = 'number'
                     column['align'] = 'right'
                     column['headerAlign'] = 'right'
@@ -269,7 +313,7 @@ class EditableTable extends React.Component {
             const rowElement = document.querySelector(`[data-id='${id}']`)
             if (rowElement) {
                 // Itera pelos campos editáveis e foca no primeiro que encontrar
-                for (let field of this.editableFields) {
+                for (let field of this.props.editableFields) {
                     const cell = rowElement.querySelector(`[data-field='${field}']`)
                     if (cell) {
                         cell.click() // Dispara o modo de edição
@@ -569,6 +613,16 @@ class EditableTable extends React.Component {
                             onRowEditStop={this.handleRowEditStop}
                             onRowDoubleClick={(params, event) => { this.props.onRowDoubleClick(params.row, event) }}
                             onCellKeyDown={this.handleKeyDown}
+                            onCellClick={(params) => { // envia o params da célula clicada
+                                const isEditable = this.props.editableFields
+                                                    ? this.props.editableFields.includes(params.field) && !(this.props.extraColumnsConfig?.[params.field]?.disabled)
+                                                    : !(this.props.extraColumnsConfig?.[params.field]?.disabled)
+                                                    
+                                if (isEditable && this.props.onCellClick) {
+                                    this.props.onCellClick(params)
+                                    this.setState({ selectedCellId: params.id, selectedCellField: params.field })
+                                }
+                            }}
                         />
                     </LocalizationProvider>
                 </Box>
