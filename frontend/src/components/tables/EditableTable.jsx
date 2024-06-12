@@ -41,12 +41,18 @@ class CurrencyEditInput extends React.Component {
         }
     }
 
+    onInputFocus = (params) => {
+		params.target.select() 
+	}
+
+
     render() {
         return (
             <GridEditInputCell
                 {...this.props}
                 value={this.state.inputValue}
                 onChange={this.handleChange}
+                onFocus={this.onInputFocus}
                 type="text"
             />
         )
@@ -352,8 +358,7 @@ class EditableTable extends React.Component {
             event.preventDefault()
             event.stopPropagation()
             const currentField = params.field
-            const currentRowIndex = this.state.rows.findIndex(row => row.id_item === params.id)
-            const editableRows = ['qt_embalagem_fornecedor', 'vl_embalagem', 'marca']
+            const editableRows = this.props.editableFields
             const currentFieldIndex = editableRows.indexOf(currentField)
 
             if (currentFieldIndex < editableRows.length - 1) {
@@ -367,9 +372,12 @@ class EditableTable extends React.Component {
                     nextCell.click()
                     nextCell.focus()
                 }
+
+                const inputElement = nextCell.querySelector('input, textarea, select')
+                if (inputElement) {
+                    inputElement.select()
+                }
             } else {
-                // Save the current row and move to the first field of the next row
-                const nextRowIndex = currentRowIndex + 1;
                 this.setState({}, () => this.handleSaveClick2(params.id))
             }
         }
@@ -572,6 +580,7 @@ class EditableTable extends React.Component {
                     <LocalizationProvider dateAdapter={AdapterDayjs} theme={theme}>
 
                         <DataGrid
+                            disableVirtualization  // Faz com que todas as linhas sejam renderizada na DOM de primeira
                             paginationMode="server"
                             editMode="row"
                             loading={this.props.isLoading}

@@ -28,7 +28,7 @@ function withHooks(WrappedComponent) {
 	return function (props) {
 		const { entity, quoteId } = useParams()
 		const [theme] = useMode()
-        const colors = tokens()
+		const colors = tokens()
 
 		return (
 			<WrappedComponent colors={colors} theme={theme} {...props} entity={entity} quoteId={quoteId} />
@@ -275,8 +275,13 @@ class App extends React.Component {
 	onInputFocus = (params) => {
 		this.setState({
 			focusedInput: params.target.id,
+		}, () => {
+			if (this.state.focusedInput !== 'buttonRef') {
+				params.target.select() // seleciona todo o conteúdo quando em foco (ctrl + A)
+			} else {
+				return
+			}
 		})
-		// params.target.select() // seleciona todo o conteúdo quando em foco (ctrl + A)
 	}
 
 	onTableEdit = (row, method, extraParam, currentRow) => {
@@ -581,7 +586,6 @@ class App extends React.Component {
 												width='100%'
 												type='number'
 												disabled={!this.state.isValid}
-												isFocused={this.state.focusedInput === 'nr_dias_prazo_entrega'}
 												onFocus={this.onInputFocus}
 											/>
 
@@ -596,7 +600,6 @@ class App extends React.Component {
 												width='100%'
 												type='number'
 												disabled={!this.state.isValid}
-												isFocused={this.state.focusedInput === 'nr_dias_prazo_pagamento'}
 												onFocus={this.onInputFocus}
 											/>
 
@@ -611,7 +614,6 @@ class App extends React.Component {
 												onKeyUp={this.handleKeyUp}
 												width='100%'
 												disabled={!this.state.isValid}
-												isFocused={this.state.focusedInput === 'cd_condicaovendacompra'}
 												onFocus={this.onInputFocus}
 											/>
 
@@ -645,7 +647,6 @@ class App extends React.Component {
 													{...this.props}
 													id="buttonRef"
 													ref={this.buttonRef}
-													isFocused={this.state.focusedInput === 'buttonRef'}
 													onFocus={this.onInputFocus}
 													sx={{
 														backgroundColor: 'orange',
