@@ -42,8 +42,8 @@ class CurrencyEditInput extends React.Component {
     }
 
     onInputFocus = (params) => {
-		params.target.select() 
-	}
+        params.target.select()
+    }
 
 
     render() {
@@ -182,9 +182,9 @@ class EditableTable extends React.Component {
         }
 
         keys.map((value, index) => {
-            const isEditable = this.props.editableFields 
-                                    ? this.props.editableFields.includes(value[0]) && this.props.allowEditOnRow && !(this.props.extraColumnsConfig?.[value[0]]?.disabled)
-                                    : this.props.allowEditOnRow && !(this.props.extraColumnsConfig?.[value[0]]?.disabled)
+            const isEditable = this.props.editableFields
+                ? this.props.editableFields.includes(value[0]) && this.props.allowEditOnRow && !(this.props.extraColumnsConfig?.[value[0]]?.disabled)
+                : this.props.allowEditOnRow && !(this.props.extraColumnsConfig?.[value[0]]?.disabled)
 
             var column = {
                 field: value[0],
@@ -202,11 +202,11 @@ class EditableTable extends React.Component {
                     column['type'] = 'date'
                     column['valueFormatter'] = (params) => formatDate(params?.value)
                     column['renderEditCell'] = (params) => <CustomDatePicker {...params} />
-                } 
+                }
                 else if (type === 'select') {
                     column['type'] = 'singleSelect'
                     column['valueOptions'] = this.props.extraColumnsConfig[value[0]]['options']
-                } 
+                }
                 else if (type === 'number') {
                     column['type'] = 'number'
                     column['align'] = 'right'
@@ -244,6 +244,19 @@ class EditableTable extends React.Component {
                     }
                 }
                 else if (type === 'text') {
+                    column['renderEditCell'] = (params) => (
+                        <input
+                            style={{
+                                border: 'none',
+                                outline: 'none',
+                                padding: '0 10px',
+                            }}
+                            type="text"
+                            value={params.value || ''}
+                            onFocus={e => e.target.select()}
+                            onChange={(e) => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value }, e)}
+                        />
+                    )
                     column['renderCell'] = (params) => (
                         params.value ? params.value.toString().toUpperCase() : ''
                     )
@@ -624,9 +637,9 @@ class EditableTable extends React.Component {
                             onCellKeyDown={this.handleKeyDown}
                             onCellClick={(params) => { // envia o params da célula clicada
                                 const isEditable = this.props.editableFields
-                                                    ? this.props.editableFields.includes(params.field) && !(this.props.extraColumnsConfig?.[params.field]?.disabled)
-                                                    : !(this.props.extraColumnsConfig?.[params.field]?.disabled)
-                                                    
+                                    ? this.props.editableFields.includes(params.field) && !(this.props.extraColumnsConfig?.[params.field]?.disabled)
+                                    : !(this.props.extraColumnsConfig?.[params.field]?.disabled)
+
                                 if (isEditable && this.props.onCellClick) {
                                     this.props.onCellClick(params)
                                     this.setState({ selectedCellId: params.id, selectedCellField: params.field })
