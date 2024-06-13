@@ -17,7 +17,41 @@ import { GridRowModes, DataGrid, GridToolbarContainer, GridActionsCellItem, Grid
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 
-class CurrencyEditInput extends React.Component {
+class TextEditInput extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            inputValue: (props.value || '')
+        }
+    }
+
+    handleChange = (event) => {
+        this.setState({ inputValue: event.target.value.toUpperCase() })
+        this.props.api.setEditCellValue({
+            id: this.props.id,
+            field: this.props.field,
+            value: event.target.value.toUpperCase()
+        }, event)
+    }
+
+    onInputFocus = (params) => {
+        params.target.select()
+    }
+
+    render() {
+        return (
+            <GridEditInputCell
+                {...this.props}
+                value={this.state.inputValue}
+                onChange={this.handleChange}
+                onFocus={this.onInputFocus}
+                type="text"
+            />
+        )
+    }
+}
+
+class NumberEditInput extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
@@ -182,19 +216,22 @@ class EditableTable extends React.Component {
         }
 
         keys.map((value, index) => {
+            const extraColumnsConfig = this.props.extraColumnsConfig?.[value[0]]
+
             const isEditable = this.props.editableFields
-                ? this.props.editableFields.includes(value[0]) && this.props.allowEditOnRow && !(this.props.extraColumnsConfig?.[value[0]]?.disabled)
-                : this.props.allowEditOnRow && !(this.props.extraColumnsConfig?.[value[0]]?.disabled)
+                ? this.props.editableFields.includes(value[0]) && this.props.allowEditOnRow && !(extraColumnsConfig?.disabled)
+                : this.props.allowEditOnRow && !(extraColumnsConfig?.disabled)
 
             var column = {
                 field: value[0],
                 headerName: value[1].toUpperCase(),
-                cellClassName: value[0] + '-column--cell' + (this.props.editableFields?.includes(value[0]) && !(this.props.extraColumnsConfig?.[value[0]]?.disabled) ? ' borders' : ''),
+                cellClassName: value[0] + '-column--cell' + (this.props.editableFields?.includes(value[0]) && !(extraColumnsConfig?.disabled) ? ' borders' : ''),
                 flex: 1,
                 headerAlign: 'left',
                 align: 'left',
                 editable: isEditable
             }
+
             if (this.props.extraColumnsConfig && value[0] in this.props.extraColumnsConfig) {
                 let type = this.props.extraColumnsConfig[value[0]]['type']
 
@@ -211,55 +248,17 @@ class EditableTable extends React.Component {
                     column['type'] = 'number'
                     column['align'] = 'right'
                     column['headerAlign'] = 'right'
-                    column['renderEditCell'] = (params) => <CurrencyEditInput {...params} maxDigits={5} maxDecimals={4} />
+                    column['renderEditCell'] = (params) => <NumberEditInput {...params} maxDigits={extraColumnsConfig?.maxLength || 5} maxDecimals={extraColumnsConfig?.maxDecimals || 0} />
                     column['renderCell'] = (params) => {
                         if (params.value !== null) {
-                            let adjustedValue = params.value > 99999 ? 99999 : params.value
-                            return adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })
-                        }
-                    }
-                }
-                else if (type === 'currencyTwoDecimals') {
-                    column['type'] = 'number'
-                    column['align'] = 'right'
-                    column['headerAlign'] = 'right'
-                    column['renderEditCell'] = (params) => <CurrencyEditInput {...params} maxDigits={5} maxDecimals={2} />
-                    column['renderCell'] = (params) => {
-                        if (params.value !== null) {
-                            let adjustedValue = params.value > 99999 ? 99999 : params.value
-                            return `R$ ${adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                        }
-                    }
-                }
-                else if (type === 'currencyFourDecimals') {
-                    column['type'] = 'number'
-                    column['align'] = 'right'
-                    column['headerAlign'] = 'right'
-                    column['renderEditCell'] = (params) => <CurrencyEditInput {...params} maxDigits={5} maxDecimals={4} />
-                    column['renderCell'] = (params) => {
-                        if (params.value !== null) {
-                            let adjustedValue = params.value > 99999 ? 99999 : params.value
-                            return `R$ ${adjustedValue.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`
+                            return `${extraColumnsConfig?.prefix || ''} 
+                                    ${params.value.toLocaleString('pt-BR', { minimumFractionDigits: extraColumnsConfig?.maxDecimals || 0, maximumFractionDigits: extraColumnsConfig?.maxDecimals || 0 })}
+                                    ${extraColumnsConfig?.suffix || ''}`
                         }
                     }
                 }
                 else if (type === 'text') {
-                    column['renderEditCell'] = (params) => (
-                        <input
-                            style={{
-                                border: 'none',
-                                outline: 'none',
-                                padding: '0 10px',
-                            }}
-                            type="text"
-                            value={params.value || ''}
-                            onFocus={e => e.target.select()}
-                            onChange={(e) => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value }, e)}
-                        />
-                    )
-                    column['renderCell'] = (params) => (
-                        params.value ? params.value.toString().toUpperCase() : ''
-                    )
+                    column['renderEditCell'] = (params) => <TextEditInput {...params} />
                 }
             }
 
@@ -445,68 +444,7 @@ class EditableTable extends React.Component {
         }
     }
 
-    setRowModesModel = (models) => {
-        this.setState({
-            rowModesModel: models
-        })
-    }
-
     render() {
-        const theme = createTheme({
-            components: {
-                MuiDataGrid: {
-                    styleOverrides: {
-                        root: {
-                            fontSize: '13px',
-                            borderColor: this.props.colors.grey[500], // Cor da borda
-                            border: 'none',
-                            '--unstable_DataGrid-overlayBackground': 'transparent',
-                            '--DataGrid-containerBackground': 'transparent', // cor do background do cabeçalho transparente
-                        },
-                        columnHeader: {
-                            backgroundColor: this.props.colors.primary[400], // cor do cabeçalho
-                            maxHeight: '35px', // altura do header de cada coluna
-                            '&[aria-colindex="1"]': { // borderRadius no cabeçalho da primeira coluna da tabela
-                                borderRadius: '20px 0 0 20px'
-                            },
-                            [`&[aria-colindex="${this.state.columns.length + (this.props.allowEdit ? 1 : 0)}"]`]: { // borderRadius no cabeçalho da última coluna da tabela
-                                borderRadius: '0 20px 20px 0'
-                            },
-                        },
-                        columnHeaders: {
-                            maxHeight: '35px', // altura do Header total
-                            '&::after': { // remove a linha abaixo do header
-                                content: 'none' // 
-                            },
-                        },
-                        cell: {
-                            height: '49px',
-                            margin: '2px 0',
-                            '&.borders': {
-                                border: `1px solid ${this.props.colors.grey[700]}`,
-                                borderRadius: '10px',
-                                marginRight: '2px'
-                            }
-                        },
-                        footerContainer: {
-                            height: '30px',
-                            minHeight: '30px',
-                            backgroundColor: this.props.colors.primary[400], // cor do footer
-                            borderRadius: '20px'
-                        },
-                        // row: {
-                        //     '&.Mui-selected': {                       // Cor da linha selecionada
-                        //         backgroundColor: 'red',
-                        //         '&:hover, &.Mui-focusVisible': {      // cor da linha selecionada ao passar o mouse
-                        //             backgroundColor: 'green',
-                        //         },
-                        //     },
-                        // },
-                    },
-                },
-            },
-        })
-
         var appendedColumns = this.state.columns
         if (this.props.allowEdit) {
             appendedColumns = [
@@ -584,16 +522,16 @@ class EditableTable extends React.Component {
         }
 
         return (
-            <ThemeProvider theme={theme}>
                 <Box
                     m={this.props.customMargin ?? '30px 0 0 0'}
                     height={this.props.height ?? '75vh'}
                     backgroundColor='transparent' // BackgroundColor da EditableTable
                 >
-                    <LocalizationProvider dateAdapter={AdapterDayjs} theme={theme}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
 
                         <DataGrid
                             disableVirtualization  // Faz com que todas as linhas sejam renderizada na DOM de primeira
+                            className='editable-table'
                             paginationMode="server"
                             editMode="row"
                             loading={this.props.isLoading}
@@ -645,10 +583,20 @@ class EditableTable extends React.Component {
                                     this.setState({ selectedCellId: params.id, selectedCellField: params.field })
                                 }
                             }}
+
+                            sx={{
+                                '& .MuiDataGrid-columnHeader': {
+                                    '&[aria-colindex="1"]': { // borderRadius no cabeçalho da primeira coluna da tabela
+                                        borderRadius: '20px 0 0 20px'
+                                    },
+                                    [`&[aria-colindex="${this.state.columns.length + (this.props.allowEdit ? 1 : 0)}"]`]: { // borderRadius no cabeçalho da última coluna da tabela
+                                        borderRadius: '0 20px 20px 0'
+                                    },
+                                },
+                            }}
                         />
                     </LocalizationProvider>
                 </Box>
-            </ThemeProvider>
         )
     }
 }

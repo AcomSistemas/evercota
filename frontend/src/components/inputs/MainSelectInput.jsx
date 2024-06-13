@@ -26,7 +26,7 @@ class MainSelectInput extends React.Component {
 
     render() {
         return (
-            <Box sx={{ width: '100%' }}>
+            <Box sx={{ width: this.props.width ? this.props.width : '100%' }}>
                 <Typography sx={{ fontSize: '13px' }}>
                     {this.props.required
                         ? <>{this.props.label}<span style={{ color: this.props.colors.redAccent[500] }}> *</span></> ?? ''
@@ -34,58 +34,14 @@ class MainSelectInput extends React.Component {
                     }
                 </Typography>
 
-                <FormControl
+                <FormControl className="main-select-input"
                     size={this.props.size ?? 'small'}
                     sx={{
-                        '& .MuiOutlinedInput-input.Mui-disabled': {
-                            paddingLeft: '10px !important',
-                        },
-                        '& .MuiInputBase-root': {
-                            fontSize: '16px', // Tamanho da fonte da label
-                            borderRadius: '25px',
-                        },
-                        // '& label.Mui-focused': {
-                        //     color: this.props.colors.blueAccent[400], // cor do label quando o input está selecionado
-                        // },
-                        '& .MuiOutlinedInput-root': {
-                            '&.Mui-focused fieldset': {
-                                borderColor: this.props.colors.grey[500], // borda do input quando está selecionado
-                            },
-                        },
-                        '& .MuiInputBase-input': {
-                            borderRadius: '25px',
-                        },
-                        '& .MuiInputBase-input.Mui-disabled': {
-                            WebkitTextFillColor: this.props.colors.grey[100],
-                            backgroundColor: this.props.colors.primary[400], // Background do campo quando desabilitado
-                            borderRadius: '25px',
-                            opacity: 0.7,
-                            marginLeft: '-10px',
-                            paddingLeft: '10px'
-                        },
-                        '& fieldset': {
-                            borderColor: this.props.colors.grey[800], // borda do input
-                            boxShadow: 'inset 0 6px 5px -5px #888888',
-                        },
-                        '& .MuiSvgIcon-root': {
-                            color: this.props.colors.grey[1100],
-                        },
-                        '& .MuiAutocomplete-input': {
-                            color: this.props.colors.grey[100]
-                        },
                         width: this.props.width ? this.props.width : '100%',
                         ...this.props.sx,
                     }}
                 >
                     <Autocomplete
-                        sx={{
-                            "& .MuiAutocomplete-popupIndicator": {
-                                color: this.props.colors.grey[1100],
-                            },
-                            "& .MuiOutlinedInput-root": {
-                                padding: '1px 0px 1px 10px !important',
-                            },
-                        }}
                         onKeyUp={this.props.onKeyUp ?? null}
                         id={this.props.id ?? null}
                         onFocus={(params) => this.props.onFocus ? this.props.onFocus(params) : null}
@@ -102,15 +58,6 @@ class MainSelectInput extends React.Component {
                                 InputLabelProps={{ shrink: false }}
                                 inputProps={{
                                     ...params.inputProps,
-
-                                    sx: {
-                                        backgroundColor: this.props.colors.custom['colorWhite'],
-                                        color: this.props.colors.grey[1100],
-                                        '& .Mui-selected': {
-                                            color: this.props.colors.grey[100],
-                                            backgroundColor: 'transparent',
-                                        },
-                                    }
                                 }}
                             />
                         )}

@@ -20,7 +20,7 @@ class MainTextField extends React.Component {
 
     render() {
         return (
-            <Box sx={{ width: '100%' }}>
+            <Box sx={{ width: this.props.width ? this.props.width : '100%' }}>
                 <Typography sx={{ fontSize: '13px' }}>
                     {this.props.required
                         ? <>{this.props.label}<span style={{ color: this.props.colors.redAccent[600] }}> *</span></> ?? ''
@@ -30,49 +30,10 @@ class MainTextField extends React.Component {
 
                 <TextField className="main-text-field"
                     sx={{
-                        '& .MuiInputBase-root': {
-                            fontSize: '16px', // Tamanho da fonte da label
-                            borderRadius: '25px',
-                            padding: '0',
-                        },
-                        '& label': {
-                            color: this.props.colors.grey[400],
-                        },
-                        '& .MuiOutlinedInput-root': {
-                            '& fieldset': {
-                                borderColor: this.props.colors.grey[800], // cor da borda sem estar em foco
-                            },
-                            '&.Mui-focused fieldset': {
-                                borderColor: this.props.colors.grey[500], // cor da borda quando em foco
-                            },
-                            // '&:hover fieldset': {
-                            //     borderColor: 'yellow', // cor da borda quando passado mouse por cima do input
-                            // },
-                        },
-                        '& .MuiInputBase-input.Mui-disabled': {
-                            WebkitTextFillColor: this.props.colors.grey[100],
-                            backgroundColor: this.props.colors.primary[400], // Background do campo quando desabilitado
-                            borderRadius: '25px',
-                            width: '100%',
-                            opacity: 0.7
-                        },
-                        '& .MuiInputBase-input': {
-                            padding: '10px',
-                            boxShadow: 'inset 0 6px 5px -5px #888888', // boxShadow interno dos inputs
-                            backgroundColor: 'transparent',  // cor do background do input
-                            borderRadius: '25px'
-                        },
-                        input: { // Propriedades do Input
-                            color: this.props.colors.grey[100],
-                            borderRadius: '25px',
-                            textAlign: this.props.type === 'number' ? 'right' : 'left',
-                            '&::-webkit-inner-spin-button': {
-                                // '-webkit-appearance': 'none', // desabilita as flechas
-                                marginLeft: '5px', // margin das flechas
-                            },
+                        input: { 
+                            textAlign: ['number','numberTwoDecimals'].includes(this.props.type) ? 'right' : 'left',
                         },
                         width: this.props.width ? this.props.width : '100%',
-                        height: '100%',
                         ...this.props.sx,
                     }}
                     onKeyUp={this.props.onKeyUp ?? null}
@@ -89,6 +50,9 @@ class MainTextField extends React.Component {
                     fullWidth={this.props.fullWidth ? true : false}
                     placeholder={this.props.placeholder ?? ''}
                     onBlur={this.props.onBlur ?? null}
+                    inputProps={{
+                        maxLength: this.props.maxLength ?? undefined,
+                    }}
                     InputLabelProps={{
                         shrink: false
                     }}

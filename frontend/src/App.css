@@ -1,3 +1,39 @@
+:root {
+	/* Grey Scale */
+	--grey-100: #141414;
+	--grey-500: #666666;
+	--grey-800: #c2c2c2;
+	--grey-1100: #616161;
+
+	/* Primary Colors */
+	--primary-400: #f2f0f0;
+
+	/* Green Accents */
+	--greenAccent-500: #4cceac;
+
+	/* Red Accents */
+	--redAccent-100: #2c100f;
+	--redAccent-200: #58201e;
+	--redAccent-300: #832f2c;
+	--redAccent-400: #af3f3b;
+	--redAccent-500: #db4f4a;
+	--redAccent-600: #e2726e;
+
+	/* Blue Accents */
+	--blueAccent-100: #011F3A;
+	--blueAccent-200: #2a2d64;
+	--blueAccent-400: #535ac8;
+	--blueAccent-500: #6870fa;
+
+	/* Custom Colors */
+	--custom-boxShadow: #44444444;
+	--custom-white: #ffffff;
+	--custom-orange: #EA5C11;
+	--custom-rubaiyat: #B62626;
+	--custom-greenAlert: #3da58a;
+}
+
+
 html,
 body,
 #root,
@@ -5,12 +41,12 @@ body,
 .content {
 	width: 100%;
 	background-color: #ececec;
-	font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 	margin: 0;
 }
 
 .app-body {
-	width: 97%;	
+	width: 97%;
 	padding-left: 20px;
 }
 
@@ -26,34 +62,37 @@ body,
 
 /* NAVBAR */
 .navbar {
-    background-color: #111A46; /* Cor de fundo azul escuro */
-    color: white;
-    display: flex;
-    align-items: center;
-    height: 60px;
+	background-color: #111A46;
+	/* Cor de fundo azul escuro */
+	color: white;
+	display: flex;
+	align-items: center;
+	height: 60px;
 	margin-bottom: 50px;
 	padding: 0 20px;
 }
 
 .navbar-container {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.navbar-icon {
+	margin-top: 5px;
 }
 
 .navbar-infos {
-	margin-left: 50px;
+	margin-left: 40px;
 }
 
 .left-container {
 	display: flex;
-    align-items: center;
+	align-items: center;
 }
 
-
 /* BANNER */
-
 .banner {
 	padding-left: 20px;
 	width: 97%;
@@ -66,19 +105,242 @@ body,
 }
 
 /* COMPANY CONTAINER */
-
 .company-container {
 	background-color: #F8F8F8;
 	display: flex;
-    justify-content: space-between;
-    align-items: center;
+	justify-content: space-between;
+	align-items: center;
 	padding: 0 20px;
 	border-radius: 10px;
 }
-
 
 /* PRICE HEADER */
 .price-header {
 	background-color: white;
 	max-width: 100%;
+}
+
+/* --------------------------------------------------- MainTextField --------------------------------------------------- */
+.main-text-field .MuiInputBase-root {
+	font-size: 16px;
+	/* Tamanho da fonte da label */
+	border-radius: 25px;
+	padding: 0;
+}
+
+.main-text-field label {
+	color: var(--grey-400);
+}
+
+.main-text-field .MuiOutlinedInput-root fieldset {
+	border-color: var(--grey-800);
+	/* cor da borda sem estar em foco */
+}
+
+.main-text-field .MuiOutlinedInput-root.Mui-focused fieldset {
+	border-color: var(--grey-500);
+	/* cor da borda quando em foco */
+}
+
+/*
+  .main-text-field .MuiOutlinedInput-root:hover fieldset {
+	border-color: yellow; /* cor da borda quando passado mouse por cima do input 
+  }
+  */
+
+.main-text-field .MuiInputBase-input.Mui-disabled {
+	-webkit-text-fill-color: var(--grey-100);
+	background-color: var(--primary-400);
+	/* Background do campo quando desabilitado */
+	border-radius: 25px;
+	width: 100%;
+	opacity: 0.7;
+}
+
+.main-text-field .MuiInputBase-input {
+	padding: 10px;
+	box-shadow: inset 0 6px 5px -5px #888888;
+	/* boxShadow interno dos inputs */
+	background-color: transparent;
+	/* cor do background do input */
+	border-radius: 25px;
+}
+
+.main-text-field .MuiInputBase-input::-webkit-inner-spin-button {
+	margin-left: 5px;
+}
+
+.main-text-field input {
+	color: var(--grey-100);
+	border-radius: 25px;
+}
+
+/* --------------------------------------------------- MainSelectInput --------------------------------------------------- */
+.main-select-input .MuiAutocomplete-root .MuiOutlinedInput-root {
+	padding: 1px 0px 1px 10px !important;
+	/*tamanho do autocomplete dentro do FormControl */
+}
+
+.main-select-input .MuiOutlinedInput-input.Mui-disabled {
+	padding-left: 10px !important;
+	/* padding left para qunado o campo está desabilitado */
+}
+
+.main-select-input .MuiInputBase-root {
+	font-size: 16px;
+	/* Tamanho da fonte da label */
+	border-radius: 25px;
+}
+
+.main-select-input .MuiOutlinedInput-root.Mui-focused fieldset {
+	border-color: var(--grey-500);
+	/* borda do input quando está selecionado */
+}
+
+.main-select-input .MuiInputBase-input {
+	border-radius: 25px;
+}
+
+.main-select-input .MuiInputBase-input.Mui-disabled {
+	-webkit-text-fill-color: var(--grey-100);
+	background-color: var(--primary-400);
+	/* Background do campo quando desabilitado */
+	border-radius: 25px;
+	opacity: 0.7;
+	margin-left: -10px;
+	padding-left: 10px;
+}
+
+.main-select-input fieldset {
+	border-color: var(--grey-800);
+	/* borda do input */
+	box-shadow: inset 0 6px 5px -5px #888888;
+}
+
+.main-select-input .MuiSvgIcon-root {
+	color: var(--grey-1100);
+}
+
+.main-select-input .MuiAutocomplete-input {
+	color: var(--grey-100);
+}
+
+/* --------------------------------------------------- MainDateTimeInput --------------------------------------------------- */
+
+/* ========== type='time' ==========*/
+.main-time-input .MuiInputBase-root.Mui-disabled {
+	background-color: var(--primary-400);
+}
+
+.main-time-input .MuiInputBase-input {
+	border-radius: 25px;
+	background-color: transparent;
+}
+
+.main-time-input .MuiInputBase-input.Mui-disabled {
+	-webkit-text-fill-color: var(--grey-100);
+	opacity: 0.7;
+}
+
+.main-time-input .MuiSvgIcon-root {
+	color: var(--grey-1100);
+}
+
+.main-time-input .MuiInputBase-root {
+	height: 40px;
+	border-radius: 30px;
+}
+
+.main-time-input .MuiOutlinedInput-root fieldset {
+	border-color: var(--grey-800);
+	border-radius: 25px;
+	box-shadow: inset 0 6px 5px -5px #888888;
+	/* boxShadow superior interno do input */
+}
+
+.main-time-input .MuiOutlinedInput-root.Mui-focused fieldset {
+	border-color: var(--grey-500);
+	/* Cor da borda quando está selecionado */
+}
+
+.main-time-input label.Mui-disabled {
+	color: var(--grey-1100);
+}
+
+/* ============ type='date' ============*/
+.main-date-input .MuiInputBase-root.Mui-disabled {
+	background-color: var(--primary-400);
+}
+
+.main-date-input .MuiInputBase-input {
+	border-radius: 25px;
+	background-color: transparent;
+}
+
+.main-date-input .MuiInputBase-input.Mui-disabled {
+	-webkit-text-fill-color: var(--grey-100);
+	opacity: 0.7;
+}
+
+.main-date-input .MuiSvgIcon-root {
+	color: var(--grey-1100);
+}
+
+.main-date-input .MuiInputBase-root {
+	height: 40px;
+	border-radius: 30px;
+}
+
+.main-date-input .MuiOutlinedInput-root fieldset {
+	border-color: var(--grey-800);
+	border-radius: 25px;
+	box-shadow: inset 0 6px 5px -5px #888888;
+	/* boxShadow superior interno do input */
+}
+
+.main-date-input .MuiOutlinedInput-root.Mui-focused fieldset {
+	border-color: var(--grey-500);
+	/* Cor da borda quando está selecionado */
+}
+
+.main-date-input input {
+	color: var(--grey-100);
+	/* Cor do texto digitado */
+}
+
+.main-date-input label.Mui-disabled {
+	color: var(--grey-1100);
+}
+
+/* --------------------------------------------------- EditableTable --------------------------------------------------- */
+.editable-table {
+	border: none !important;
+	font-size: 0.85rem !important;
+}
+
+.editable-table .MuiDataGrid-columnHeader {
+	max-height: 35px;
+	background-color: var(--primary-400);
+}
+
+.editable-table .MuiDataGrid-columnHeaderTitle {
+	font-weight: bold;
+}
+
+.editable-table .MuiDataGrid-cell {
+	height: 49px;
+	margin: 2px 0;
+}
+
+.editable-table .MuiDataGrid-cell.borders {
+	border: 1px solid var(--grey-800);
+	border-radius: 10px;
+	margin-right: 2px;
+}
+
+.editable-table .MuiDataGrid-footerContainer {
+	height: 25px;
+	min-height: 25px;
+	background-color: var(--primary-400);
+	border-radius: 20px;
 }

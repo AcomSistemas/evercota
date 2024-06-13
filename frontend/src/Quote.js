@@ -532,23 +532,30 @@ class App extends React.Component {
 											{
 												'qt_cotacao': {
 													'type': 'number',
+													'maxDecimals': '4',
 												},
 												'qt_embalagem_fornecedor': this.state.isValid ? {
 													'type': 'number',
-													'borders': true,
+													'maxDecimals': '4',
 												} : {
 													'type': 'number',
+													'maxDecimals': '4',
 													'disabled': true
 												},
 												'vl_embalagem': this.state.isValid ? {
-													'type': 'currencyTwoDecimals',
-													'borders': true,
+													'type': 'number',
+													'maxDecimals': '2',
+													'prefix': 'R$',
 												} : {
-													'type': 'currencyTwoDecimals',
+													'type': 'number',
+													'maxDecimals': '2',
+													'prefix': 'R$',
 													'disabled': true
 												},
 												'vl_unitario': {
-													'type': 'currencyFourDecimals',
+													'type': 'number',
+													'maxDecimals': '4',
+													'prefix': 'R$',
 												},
 												'marca': this.state.isValid ? {
 													'type': 'text',
