@@ -513,8 +513,8 @@ class App extends React.Component {
 									<EditableTable
 										{...this.props}
 										ref={this.tableRef}
-										allowEdit
-										allowEditOnRow
+										allowEdit={this.state.isValid ? true : false}
+										allowEditOnRow={this.state.isValid ? true : false}
 										noAddRow
 										noDeleteButton
 										id='id_item'
