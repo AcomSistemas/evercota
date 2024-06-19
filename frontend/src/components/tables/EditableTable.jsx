@@ -522,81 +522,81 @@ class EditableTable extends React.Component {
         }
 
         return (
-                <Box
-                    m={this.props.customMargin ?? '30px 0 0 0'}
-                    height={this.props.height ?? '75vh'}
-                    backgroundColor='transparent' // BackgroundColor da EditableTable
-                >
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Box
+                m={this.props.customMargin ?? '30px 0 0 0'}
+                height={this.state.rows.length <= 100 ? 'auto' : '5270px'}
+                backgroundColor='transparent' // BackgroundColor da EditableTable
+            >
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
 
-                        <DataGrid
-                            disableVirtualization  // Faz com que todas as linhas sejam renderizada na DOM de primeira
-                            className='editable-table'
-                            paginationMode="server"
-                            editMode="row"
-                            loading={this.props.isLoading}
-                            initialState={{
-                                pagination: { paginationModel: { pageSize: 100, page: 0 } }
-                            }}
-                            slots={{
-                                toolbar: this.props.allowEditOnRow ? EditToolbar : null,
-                                NoRowsOverlay: () => (
-                                    <Stack height="100%" alignItems="center" justifyContent="center">
-                                        Nenhum Resultado Encontrado
-                                    </Stack>
-                                ),
-                                NoResultsOverlay: () => (
-                                    <Stack height="100%" alignItems="center" justifyContent="center">
-                                        Nenhum Resultado Encontrado
-                                    </Stack>
-                                )
-                            }}
-                            slotProps={{
-                                toolbar: {
-                                    setRows: this.setRows,
-                                    randomId: this.generateRandom,
-                                    oldRows: this.state.rows,
-                                    colors: this.props.colors.custom['secondaryButton'],
-                                    columns: this.props.columns,
-                                    noAddRow: this.props.noAddRow,
-                                    rowId: this.props.rowId
+                    <DataGrid
+                        disableVirtualization  // Faz com que todas as linhas sejam renderizada na DOM de primeira
+                        className='editable-table'
+                        paginationMode="server"
+                        editMode="row"
+                        loading={this.props.isLoading}
+                        initialState={{
+                            pagination: { paginationModel: { pageSize: 100, page: 0 } }
+                        }}
+                        slots={{
+                            toolbar: this.props.allowEditOnRow ? EditToolbar : null,
+                            NoRowsOverlay: () => (
+                                <Stack height="100%" alignItems="center" justifyContent="center">
+                                    Nenhum Resultado Encontrado
+                                </Stack>
+                            ),
+                            NoResultsOverlay: () => (
+                                <Stack height="100%" alignItems="center" justifyContent="center">
+                                    Nenhum Resultado Encontrado
+                                </Stack>
+                            )
+                        }}
+                        slotProps={{
+                            toolbar: {
+                                setRows: this.setRows,
+                                randomId: this.generateRandom,
+                                oldRows: this.state.rows,
+                                colors: this.props.colors.custom['secondaryButton'],
+                                columns: this.props.columns,
+                                noAddRow: this.props.noAddRow,
+                                rowId: this.props.rowId
+                            },
+                        }}
+                        columns={appendedColumns}
+                        rows={this.state.rows}
+                        rowCount={this.props.totalSize}
+                        getRowId={(row) => row[this.props.rowId]}
+                        processRowUpdate={this.processRowUpdate}
+                        rowModesModel={this.state.rowModesModel}
+                        onPaginationModelChange={(newPage) => this.onPageChange(newPage)}
+                        onRowModesModelChange={this.handleRowModesModelChange}
+                        onRowEditStop={this.handleRowEditStop}
+                        onRowDoubleClick={(params, event) => { this.props.onRowDoubleClick(params.row, event) }}
+                        onCellKeyDown={this.handleKeyDown}
+                        onCellClick={(params) => { // envia o params da célula clicada
+                            const isEditable = this.props.editableFields
+                                ? this.props.editableFields.includes(params.field) && !(this.props.extraColumnsConfig?.[params.field]?.disabled)
+                                : !(this.props.extraColumnsConfig?.[params.field]?.disabled)
+
+                            if (isEditable && this.props.onCellClick) {
+                                this.props.onCellClick(params)
+                                this.setState({ selectedCellId: params.id, selectedCellField: params.field })
+                            }
+                        }}
+
+                        sx={{
+                            '& .MuiDataGrid-columnHeader': {
+                                '&[aria-colindex="1"]': { // borderRadius no cabeçalho da primeira coluna da tabela
+                                    borderRadius: '20px 0 0 20px'
                                 },
-                            }}
-                            columns={appendedColumns}
-                            rows={this.state.rows}
-                            rowCount={this.props.totalSize}
-                            getRowId={(row) => row[this.props.rowId]}
-                            processRowUpdate={this.processRowUpdate}
-                            rowModesModel={this.state.rowModesModel}
-                            onPaginationModelChange={(newPage) => this.onPageChange(newPage)}
-                            onRowModesModelChange={this.handleRowModesModelChange}
-                            onRowEditStop={this.handleRowEditStop}
-                            onRowDoubleClick={(params, event) => { this.props.onRowDoubleClick(params.row, event) }}
-                            onCellKeyDown={this.handleKeyDown}
-                            onCellClick={(params) => { // envia o params da célula clicada
-                                const isEditable = this.props.editableFields
-                                    ? this.props.editableFields.includes(params.field) && !(this.props.extraColumnsConfig?.[params.field]?.disabled)
-                                    : !(this.props.extraColumnsConfig?.[params.field]?.disabled)
-
-                                if (isEditable && this.props.onCellClick) {
-                                    this.props.onCellClick(params)
-                                    this.setState({ selectedCellId: params.id, selectedCellField: params.field })
-                                }
-                            }}
-
-                            sx={{
-                                '& .MuiDataGrid-columnHeader': {
-                                    '&[aria-colindex="1"]': { // borderRadius no cabeçalho da primeira coluna da tabela
-                                        borderRadius: '20px 0 0 20px'
-                                    },
-                                    [`&[aria-colindex="${this.state.columns.length + (this.props.allowEdit ? 1 : 0)}"]`]: { // borderRadius no cabeçalho da última coluna da tabela
-                                        borderRadius: '0 20px 20px 0'
-                                    },
+                                [`&[aria-colindex="${this.state.columns.length + (this.props.allowEdit ? 1 : 0)}"]`]: { // borderRadius no cabeçalho da última coluna da tabela
+                                    borderRadius: '0 20px 20px 0'
                                 },
-                            }}
-                        />
-                    </LocalizationProvider>
-                </Box>
+                            },
+                        }}
+                    />
+                </LocalizationProvider>
+            </Box>
         )
     }
 }

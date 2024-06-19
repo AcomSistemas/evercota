@@ -58,7 +58,7 @@ class MainDateTimeInput extends React.Component {
         if (this.props.type === 'time') {
             return (
                 <Box sx={{ width: this.props.width ? this.props.width : '100%' }}>
-                    <Typography sx={{ fontSize: '13px', color: this.state.wrongFormat ? 'red' : '' }}>
+                    <Typography sx={{ fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: this.state.wrongFormat ? 'red' : '' }}>
                         {this.props.required
                             ? <>{this.props.label}<span style={{ color: this.props.colors.redAccent[600] }}> *</span></> ?? ''
                             : this.props.label ?? ''
@@ -89,7 +89,7 @@ class MainDateTimeInput extends React.Component {
         } else if (this.props.type === 'date') {
             return (
                 <Box sx={{ width: this.props.width ? this.props.width : '100%' }}>
-                    <Typography sx={{ fontSize: '13px' }}>
+                    <Typography sx={{ fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {this.props.required
                             ? <>{this.props.label}<span style={{ color: this.props.colors.redAccent[600] }}> *</span></> ?? ''
                             : this.props.label ?? ''

@@ -442,7 +442,7 @@ class App extends React.Component {
 											alignItems: 'center',
 											gridTemplateColumns: {
 												sm: '1fr',
-												md: '0.6fr 0.6fr 0.6fr 0.6fr 1.6fr 0.7fr',
+												md: '0.6fr 0.6fr 0.6fr 0.5fr 1.6fr 0.7fr',
 											},
 										}}
 									>
@@ -518,7 +518,6 @@ class App extends React.Component {
 										noAddRow
 										noDeleteButton
 										id='id_item'
-										height='45vh'
 										data={this.state.data?.itens}
 										columns={this.state.dataColumns}
 										rowId='id_item'
@@ -563,6 +562,11 @@ class App extends React.Component {
 												} : {
 													'disabled': true
 												},
+											}
+										}
+										customRowSize={
+											{
+												'ds_item': -80,
 											}
 										}
 									/>
