@@ -1,3 +1,39 @@
+:root {
+	/* Grey Scale */
+	--grey-100: #141414;
+	--grey-500: #666666;
+	--grey-800: #c2c2c2;
+	--grey-1100: #616161;
+
+	/* Primary Colors */
+	--primary-400: #f2f0f0;
+
+	/* Green Accents */
+	--greenAccent-500: #4cceac;
+
+	/* Red Accents */
+	--redAccent-100: #2c100f;
+	--redAccent-200: #58201e;
+	--redAccent-300: #832f2c;
+	--redAccent-400: #af3f3b;
+	--redAccent-500: #db4f4a;
+	--redAccent-600: #e2726e;
+
+	/* Blue Accents */
+	--blueAccent-100: #011F3A;
+	--blueAccent-200: #2a2d64;
+	--blueAccent-400: #535ac8;
+	--blueAccent-500: #6870fa;
+
+	/* Custom Colors */
+	--custom-boxShadow: #44444444;
+	--custom-white: #ffffff;
+	--custom-orange: #EA5C11;
+	--custom-rubaiyat: #B62626;
+	--custom-greenAlert: #3da58a;
+}
+
+
 html,
 body,
 #root,
@@ -5,12 +41,12 @@ body,
 .content {
 	width: 100%;
 	background-color: #ececec;
-	font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 	margin: 0;
 }
 
 .app-body {
-	width: 97%;	
+	width: 97%;
 	padding-left: 20px;
 }
 
@@ -26,34 +62,37 @@ body,
 
 /* NAVBAR */
 .navbar {
-    background-color: #111A46; /* Cor de fundo azul escuro */
-    color: white;
-    display: flex;
-    align-items: center;
-    height: 60px;
+	background-color: #111A46;
+	/* Cor de fundo azul escuro */
+	color: white;
+	display: flex;
+	align-items: center;
+	height: 60px;
 	margin-bottom: 50px;
 	padding: 0 20px;
 }
 
 .navbar-container {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.navbar-icon {
+	margin-top: 5px;
 }
 
 .navbar-infos {
-	margin-left: 50px;
+	margin-left: 40px;
 }
 
 .left-container {
 	display: flex;
-    align-items: center;
+	align-items: center;
 }
 
-
 /* BANNER */
-
 .banner {
 	padding-left: 20px;
 	width: 97%;
@@ -75,8 +114,8 @@ body,
 
 .company-container {
 	display: flex;
-    justify-content: space-between;
-    align-items: center;
+	justify-content: space-between;
+	align-items: center;
 	padding: 0 20px;
 	border-radius: 10px;
 }

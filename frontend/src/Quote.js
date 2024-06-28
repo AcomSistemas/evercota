@@ -43,11 +43,11 @@ import './App.css';
 function withHooks(WrappedComponent) {
 	return function (props) {
 		const { entity, quoteId } = useParams()
-		const [theme, colorMode] = useMode()
-		const colors = tokens(theme.palette.mode)
+		const [theme] = useMode()
+		const colors = tokens()
 
 		return (
-			<WrappedComponent colors={colors} colorMode={colorMode} theme={theme} {...props} entity={entity} quoteId={quoteId} />
+			<WrappedComponent colors={colors} theme={theme} {...props} entity={entity} quoteId={quoteId} />
 		)
 	}
 }
@@ -67,7 +67,7 @@ class App extends React.Component {
 			isDialogOpen: false,
 			isConfirmDialogOpen: false,
 
-			showPopUp: true,
+			showPopUp: false,
 
 			alertMessage: '',
 			alertType: '',
@@ -84,7 +84,7 @@ class App extends React.Component {
 				['ds_item', 'Descrição'],
 				['sg_unidademedida', 'UM'],
 				['qt_cotacao', 'Qtd. Cotação'],
-				['qt_embalagem_fornecedor', 'Qtd. Embalagem'],
+				['qt_embalagem_fornecedor', 'Qtd. por Embalagem'],
 				['vl_embalagem', 'Valor Embalagem'],
 				['vl_unitario', 'Valor Unitário'],
 				['marca_desejada', 'Marca Desejada'],
@@ -93,6 +93,12 @@ class App extends React.Component {
 
 			dataItensTotalSize: '',
 		}
+		this.deliveryTermRef = React.createRef()
+		this.paymentTermRef = React.createRef()
+		this.paymentTypeRef = React.createRef()
+		this.buttonRef = React.createRef()
+		this.tableRef = React.createRef()
+
 		dayjs.locale('pt-br')
 	}
 
@@ -129,12 +135,10 @@ class App extends React.Component {
 		}
 
 		if (this.state.totalQuoteValue !== prevState.totalQuoteValue) {
-			const numericValue = parseFloat(this.state.totalQuoteValue.toString().replace(',', '.'))
-			if (!isNaN(numericValue)) {
-				const formattedValue = numericValue.toFixed(2).replace('.', ',')
-				if (formattedValue !== this.state.totalQuoteValue) {
-					this.setState({ totalQuoteValue: formattedValue })
-				}
+			const numericValue = this.state.totalQuoteValue
+
+			if (numericValue !== prevState.totalQuoteValue) {
+				this.setState({ totalQuoteValue: numericValue })
 			}
 		}
 	}
@@ -170,7 +174,7 @@ class App extends React.Component {
 
 	cancelQuote = () => {
 		let config = {
-			endpoint: 'cota/cotacaoprecofornecedor/' + this.state.data.id_cotacaoprecofornecedor,
+			endpoint: 'cota/cotacaoprecofornecedor/' + this.state.quoteId,
 			method: 'delete'
 		}
 		let form = {
@@ -262,6 +266,42 @@ class App extends React.Component {
 		}))
 	}
 
+	handleKeyUp = (event) => {
+		if (event.key === "Enter") {
+			this.moveToNextInput()
+		}
+	}
+
+	moveToNextInput = () => {
+		document.activeElement.blur()
+		switch (this.state.focusedInput) {
+			case 'nr_dias_prazo_entrega':
+				this.paymentTermRef.current.focus()
+				this.setState({ focusedInput: 'nr_dias_prazo_pagamento' })
+				break
+			case 'nr_dias_prazo_pagamento':
+				this.paymentTypeRef.current.focus()
+				this.setState({ focusedInput: 'cd_condicaovendacompra' })
+				break
+			case 'cd_condicaovendacompra':
+				this.buttonRef.current.focus()
+				this.setState({ focusedInput: 'buttonRef' }, () => console.log(this.state.focusedInput))
+				break
+		}
+	}
+
+	onInputFocus = (params) => {
+		this.setState({
+			focusedInput: params.target.id,
+		}, () => {
+			if (this.state.focusedInput !== 'buttonRef') {
+				params.target.select() // seleciona todo o conteúdo quando em foco (ctrl + A)
+			} else {
+				return
+			}
+		})
+	}
+
 	onTableEdit = (row, method, extraParam, currentRow) => {
 		if (method === 'edit') {
 			this.setState({ isLoading: true },
@@ -271,23 +311,19 @@ class App extends React.Component {
 
 	sendQuote = () => {
 		const data = this.state.data
-		if (data) {
-			data.qt_embalagem = data.qt_embalagem || 0
-			data.vl_embalagem = data.vl_embalagem || 0
 
-			if (!data.cd_condicaovendacompra) {
-				this.setState({
-					alertMessage: 'Preencha todos os campos obrigatórios (*)',
-					alertType: 'error',
-					showAlert: true,
-					isConfirmDialogOpen: false
-				})
-				return
-			}
+		if (data.itens && Array.isArray(data.itens)) {
+			data.itens.forEach(item => {
+				if (!item.qt_embalagem_fornecedor) {
+					item.qt_embalagem_fornecedor = 0
+				}
+				if (!item.vl_embalagem) {
+					item.vl_embalagem = 0
+				}
+			})
 		}
 
 		data?.itens?.map((value, index) => {
-			console.log(value)
 			value.marca = value.marca?.toUpperCase()
 			value.qt_atendida = value.qt_embalagem_fornecedor ?? 0
 		})
@@ -320,18 +356,25 @@ class App extends React.Component {
 		})
 	}
 
-	sumOfTablePackingValue = () => {    // Soma de todos os valores da coluna 'Valor Embalagem'
+	sumOfTablePackingValue = () => {    // Soma de todos os valores de (qt_cotacao * vl_unitario)
 		const { data } = this.state
 		let sum = 0
+		let result = 0
+		let qt_cotacao = 0
+		let vl_unitario = 0
 
 		if (data && data.itens && data.itens.length > 0) {
 			for (let item of data.itens) {
-				sum += item.vl_embalagem ? parseFloat(item.vl_embalagem) : 0
+				qt_cotacao = item.qt_cotacao ? parseFloat(item.qt_cotacao) : 0
+				vl_unitario = item.vl_unitario ? parseFloat(item.vl_unitario) : 0
+				result = qt_cotacao * vl_unitario
+
+				sum += result ? result : 0
 			}
 		} else {
 			sum = 0
 		}
-		this.setState({ totalQuoteValue: sum })
+		this.setState({ totalQuoteValue: sum.toFixed(2) })
 	}
 
 
@@ -370,7 +413,7 @@ class App extends React.Component {
 								<Box className='logo'><img src={logo} alt="EverCota"></img></Box>
 							</Box>
 							<Box className='navbar-infos'>
-								<Typography sx={{ fontSize: '12px' }}>{this.state.data?.razao_fornecedor} | {this.state.data.cpf_cnpj_Fornecedor ? `CNPJ ${this.state.data.cpf_cnpj_Fornecedor}` : ''}</Typography>
+								<Typography sx={{ fontSize: '12px' }}>{this.state.data?.razao_fornecedor}{this.state.data.cpf_cnpj_Fornecedor ? ` | CNPJ ${this.state.data.cpf_cnpj_Fornecedor}` : ''}</Typography>
 								<Typography sx={{ fontSize: '12px' }}>{this.state.data?.fantasia_Fornecedor}</Typography>
 							</Box>
 						</div>
@@ -423,7 +466,7 @@ class App extends React.Component {
 											alignItems: 'center',
 											gridTemplateColumns: {
 												sm: '1fr',
-												md: '1fr 1fr 1fr 1fr 1fr 0.9fr',
+												md: '0.6fr 0.6fr 0.6fr 0.5fr 1.6fr 0.7fr',
 											},
 										}}
 									>
@@ -468,6 +511,7 @@ class App extends React.Component {
 											handleChange={this.handleChangeText}
 											onKeyUp={this.handleKeyUp}
 											width='100%'
+											type='number'
 											disabled='true'
 										/>
 
@@ -492,12 +536,12 @@ class App extends React.Component {
 
 									<EditableTable
 										{...this.props}
-										allowEdit
-										allowEditOnRow
+										ref={this.tableRef}
+										allowEdit={this.state.isValid ? true : false}
+										allowEditOnRow={this.state.isValid ? true : false}
 										noAddRow
 										noDeleteButton
 										id='id_item'
-										height='45vh'
 										data={this.state.data?.itens}
 										columns={this.state.dataColumns}
 										rowId='id_item'
@@ -506,41 +550,35 @@ class App extends React.Component {
 										onEditRow={this.onTableEdit}
 										onRowDoubleClick={() => { }}
 										isLoading={this.state.isLoadingTable}
+										editableFields={['qt_embalagem_fornecedor', 'vl_embalagem', 'marca']}
 										extraColumnsConfig={
 											{
-												'cd_item': {
-													'disabled': true,
-												},
-												'ds_item': {
-													'disabled': true
-												},
-												'sg_unidademedida': {
-													'disabled': true
-												},
 												'qt_cotacao': {
 													'type': 'number',
-													'disabled': true,
+													'maxDecimals': '4',
 												},
 												'qt_embalagem_fornecedor': this.state.isValid ? {
 													'type': 'number',
-													'borders': true,
+													'maxDecimals': '4',
 												} : {
 													'type': 'number',
+													'maxDecimals': '4',
 													'disabled': true
 												},
 												'vl_embalagem': this.state.isValid ? {
-													'type': 'currency',
-													'borders': true,
+													'type': 'number',
+													'maxDecimals': '2',
+													'prefix': 'R$',
 												} : {
-													'type': 'currency',
+													'type': 'number',
+													'maxDecimals': '2',
+													'prefix': 'R$',
 													'disabled': true
 												},
 												'vl_unitario': {
-													'type': 'currency',
-													'disabled': true
-												},
-												'marca_desejada': {
-													'disabled': true,
+													'type': 'number',
+													'maxDecimals': '4',
+													'prefix': 'R$',
 												},
 												'marca': this.state.isValid ? {
 													'type': 'text',
@@ -548,6 +586,11 @@ class App extends React.Component {
 												} : {
 													'disabled': true
 												},
+											}
+										}
+										customRowSize={
+											{
+												'ds_item': -80,
 											}
 										}
 									/>
@@ -561,7 +604,7 @@ class App extends React.Component {
 												alignItems: 'end',
 												gridTemplateColumns: {
 													sm: '1fr',
-													md: '0.7fr 0.7fr 1.3fr 0.7fr 0.7fr 0.5fr 0.9fr',
+													md: '0.6fr 0.6fr 1fr 0.6fr 0.6fr 0.5fr 0.7fr',
 												},
 												marginTop: '10px'
 											}}
@@ -569,6 +612,7 @@ class App extends React.Component {
 
 											<MainTextField
 												{...this.props}
+												ref={this.deliveryTermRef}
 												id='nr_dias_prazo_entrega'
 												value={this.state.data.nr_dias_prazo_entrega || ''}
 												label='Prazo de Entrega (dias)'
@@ -577,10 +621,12 @@ class App extends React.Component {
 												width='100%'
 												type='number'
 												disabled={!this.state.isValid}
+												onFocus={this.onInputFocus}
 											/>
 
 											<MainTextField
 												{...this.props}
+												ref={this.paymentTermRef}
 												id='nr_dias_prazo_pagamento'
 												value={this.state.data.nr_dias_prazo_pagamento || ''}
 												label='Prazo de Pagamento (dias)'
@@ -589,10 +635,12 @@ class App extends React.Component {
 												width='100%'
 												type='number'
 												disabled={!this.state.isValid}
+												onFocus={this.onInputFocus}
 											/>
 
 											<MainSelectInput
 												{...this.props}
+												ref={this.paymentTypeRef}
 												id='cd_condicaovendacompra'
 												value={this.state.data.cd_condicaovendacompra || ''}
 												optionsList={this.state.paymentList}
@@ -601,7 +649,7 @@ class App extends React.Component {
 												onKeyUp={this.handleKeyUp}
 												width='100%'
 												disabled={!this.state.isValid}
-												required
+												onFocus={this.onInputFocus}
 											/>
 
 											<MainTextField
@@ -612,6 +660,7 @@ class App extends React.Component {
 												handleChange={this.handleChangeText}
 												onKeyUp={this.handleKeyUp}
 												width='100%'
+												type='number'
 												disabled='true'
 											/>
 
@@ -623,6 +672,7 @@ class App extends React.Component {
 												handleChange={this.handleChangeText}
 												onKeyUp={this.handleKeyUp}
 												width='100%'
+												type='number'
 												disabled='true'
 											/>
 
@@ -630,6 +680,9 @@ class App extends React.Component {
 											{this.state.isValid ?
 												<MainButton
 													{...this.props}
+													id="buttonRef"
+													ref={this.buttonRef}
+													onFocus={this.onInputFocus}
 													sx={{
 														backgroundColor: 'orange',
 														borderRadius: '8px'

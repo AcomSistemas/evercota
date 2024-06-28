@@ -32,7 +32,7 @@ class SnackbarAlert extends React.Component {
     componentWillMount() {
         const oldParams = this.state.sxParams
         const moreParams = this.props.alertType==='success' 
-            ? {backgroundColor: this.props.colors.greenAccent[400] } 
+            ? {backgroundColor: this.props.colors.greenAccent[500] } 
             : this.props.alertType==='error' 
                 ? {backgroundColor: this.props.colors.redAccent[400]} 
                 : {backgroundColor: 'orange'}

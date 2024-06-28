@@ -33,7 +33,6 @@
       "react-app/jest"
     ]
   },
-  "homepage": "https://evercota.com.br/build",
   "browserslist": {
     "production": [
       ">0.2%",
