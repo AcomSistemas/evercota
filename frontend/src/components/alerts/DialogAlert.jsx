@@ -9,6 +9,9 @@ import { Box, Button, Dialog, Typography } from "@mui/material";
 class DialogAlert extends React.Component {
     constructor(props) {
         super(props)
+        this.state = {
+            
+        }
     }
 
     render() {

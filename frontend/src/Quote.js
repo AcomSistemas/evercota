@@ -9,11 +9,27 @@ import MainSelectInput from "./components/inputs/MainSelectInput";
 import MainTextField from "./components/inputs/MainTextField";
 import SnackbarAlert from "./components/alerts/SnackbarAlert";
 
+import CloseIcon from '@mui/icons-material/Close';
+
 import logo from "./data/logo.png";
 import logo2 from "./data/logo2.png";
 import banner from "./data/banner.png";
 
-import { Box, Typography } from "@mui/material";
+import acoes_lapis from "./data/popup/acoes_lapis.png";
+import acoes_salvar from "./data/popup/acoes_salvar.png";
+import botao1 from "./data/popup/botao1.png";
+import botao2 from "./data/popup/botao2.png";
+import header from "./data/popup/header.png";
+import inputs from "./data/popup/inputs.png";
+import marca_desejada from "./data/popup/marca_desejada.png";
+import marca_disponivel from "./data/popup/marca_disponivel.png";
+import qtd_embalagem from "./data/popup/qtd_embalagem.png";
+import resumo from "./data/popup/resumo.png";
+import tabela from "./data/popup/tabela.png";
+import valor_embalagem from "./data/popup/valor_embalagem.png";
+import valor_unitario from "./data/popup/valor_unitario.png";
+
+import { Box, Button, Divider, Grid, IconButton, Typography } from "@mui/material";
 import { defaultRequest } from "./utils/request/request";
 import { tokens } from "./typograhpy";
 import { useMode } from "./typograhpy";
@@ -50,6 +66,8 @@ class App extends React.Component {
 
 			isDialogOpen: false,
 			isConfirmDialogOpen: false,
+
+			showPopUp: true,
 
 			alertMessage: '',
 			alertType: '',
@@ -374,28 +392,34 @@ class App extends React.Component {
 					<Box className='app-body'>
 						{this.state.data ?
 							<>
-								<Box className='company-container'>
-									<div className='left-container'>
-										<Box className='navbar-icon'>
-											<Box className='logo'><img src={logo2} alt="Logo"></img></Box>
+								<Box className='company-outcontainer'>
+									<Box className='company-container'>
+										<div className='left-container'>
+											<Box className='navbar-icon'>
+												<Box className='logo'><img src={logo2} alt="Logo"></img></Box>
+											</Box>
+											<Box className='navbar-infos'>
+												<Typography sx={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px' }}>Empresa solicitante:</Typography>
+												<Typography sx={{ fontSize: '12px' }}>{this.state.data.razao} | CNPJ {this.state.data.cpf_cnpj}</Typography>
+												<Typography sx={{ fontSize: '12px' }}>{this.state.data.fantasia}</Typography>
+											</Box>
+										</div>
+										<Box>
+											<Typography sx={{ fontSize: '12px' }}>{this.state.data.nm_usuario ?? ''}</Typography>
+											<Typography sx={{ fontSize: '12px' }}>{this.state.data.email_particular} | {this.state.data.nr_fone ? `+55 ${this.state.data.nr_fone}` : ''}</Typography>
 										</Box>
-										<Box className='navbar-infos'>
-											<Typography sx={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px' }}>Empresa solicitante:</Typography>
-											<Typography sx={{ fontSize: '12px' }}>{this.state.data.razao} | CNPJ {this.state.data.cpf_cnpj}</Typography>
-											<Typography sx={{ fontSize: '12px' }}>{this.state.data.fantasia}</Typography>
-										</Box>
-									</div>
-									<Box>
-										<Typography sx={{ fontSize: '12px' }}>{this.state.data.nm_usuario ?? ''}</Typography>
-										<Typography sx={{ fontSize: '12px' }}>{this.state.data.email_particular} | {this.state.data.nr_fone ? `+55 ${this.state.data.nr_fone}` : ''}</Typography>
+
+									</Box>
+									<Box className='company-button-container'>
+										<Button className='help-button' onClick={() => { this.setState({ showPopUp: true }) }}><Typography>Como preencher a cotação</Typography></Button>
 									</Box>
 								</Box>
 
-								<Box sx={{ backgroundColor: 'white', padding: '10px 20px', borderRadius: '10px', margin: '20px 0' }}>
+								<Box sx={{ backgroundColor: 'white', padding: '10px 25px', borderRadius: '10px', margin: '25px 0' }}>
 									<Box
 										sx={{
 											display: 'grid',
-											gap: '20px',
+											gap: '25px',
 											alignItems: 'center',
 											gridTemplateColumns: {
 												sm: '1fr',
@@ -448,7 +472,7 @@ class App extends React.Component {
 										/>
 
 										<Box></Box>
-										
+
 										{this.state.isValid ?
 											<MainButton
 												{...this.props}
@@ -528,12 +552,12 @@ class App extends React.Component {
 										}
 									/>
 
-									<Box sx={{ marginTop: '30px' }}>
+									<Box sx={{ marginTop: '25px' }}>
 										<Typography>Resumo da Cotação</Typography>
 										<Box
 											sx={{
 												display: 'grid',
-												gap: '20px',
+												gap: '25px',
 												alignItems: 'end',
 												gridTemplateColumns: {
 													sm: '1fr',
@@ -637,6 +661,125 @@ class App extends React.Component {
 						}
 					</Box>
 				}
+
+				{this.state.showPopUp &&
+					(
+						<PopUp onClose={()=>{this.setState({showPopUp: false})}} />
+					)}
+			</>
+		)
+	}
+}
+
+class PopUp extends React.Component {
+
+	render() {
+		return (
+			<>
+				<Box className='popup'>
+					<Box className='outer-box'>
+						<Box className='content'>
+							<Box className='header'>
+							<Typography className='title'>Entenda como preencher os campos e enviar a sua cotação</Typography>
+
+							<IconButton sx={{ margin: '0 15px 0 20px', backgroundColor: '#fff', height: '45px', width: '45px', borderRadius: '100%' }} onClick={this.props.onClose}>
+								<CloseIcon sx={{ color: '#000', fontSize: '30px' }} />
+							</IconButton>
+							</Box>
+
+							<Typography sx={{marginTop: '25px'}} className='text'>Este espaço mostra os dados da empresa solicitante da cotação, assim como os dados do comprador responsável.</Typography>
+							<img class='image' src={header}></img>
+
+							<Divider />
+
+							<Typography sx={{marginTop: '25px'}} className='text'>Neste espaço você confere os dados de controle da cotação. Fique atento à data e horário limite para enviar sua proposta. Até o encerramento do prazo, você poderá alterar os dados da cotação a qualquer momento.</Typography>
+							<img class='image' src={inputs}></img>
+
+							<Divider />
+
+							<Typography sx={{marginTop: '25px'}} className='text'>No bloco seguinte do formulário, você poderá verificar os itens e as quantidades solicitadas na cotação. Nesta lista, alguns itens poderão apresentar uma quantidade de cotação (QTD COTAÇÃO) igual a zero. Nestes casos, trata-se de uma tomada de preços para atualização de tabelas. </Typography>
+
+							<img class='image' src={tabela}></img>
+
+							<Typography sx={{marginTop: '25px'}} className='text'>Informe em cada linha da tabela, os dados dos itens os quais deseja incluir na proposta. Se alguns dos itens não forem fornecidos por você, deixe os campos em branco. Veja o que preencher em cada um deles: </Typography>
+
+							<Grid container columnSpacing={2} rowSpacing={4} sx={{margin: '25px 0'}}>
+								<Grid item md={2}><img class='image' src={qtd_embalagem}></img></Grid>
+								<Grid item md={4} className='grid'><Typography className='text'>Informe neste campo a quantidade de itens contidos em cada embalagem. Exemplo: 12 se a embalagem for uma caixa com 12 itens.</Typography></Grid>
+
+								<Grid item md={2}><img class='image' src={valor_embalagem}></img></Grid>
+								<Grid item md={4} className='grid'><Typography className='text'>Informe neste campo o valor total da embalagem de seu fornecimento.</Typography></Grid>
+
+								<Grid item md={2}><img class='image' src={valor_unitario}></img></Grid>
+								<Grid item md={4} className='grid'><Typography className='text'>Neste campo aparecerá o valor unitário que o sistema calcula e gera, dividindo o valor da embalagem pela quantidade de itens contidos nela.</Typography></Grid>
+
+								<Grid item md={2}><img class='image' src={marca_desejada}></img></Grid>
+								<Grid item md={4} className='grid'><Typography className='text'>Este campo será preenchido pelo sistema quando houver uma indicação de marca que seja relevante para o solicitante. </Typography></Grid>
+
+								<Grid item md={2}><img class='image' src={marca_disponivel}></img></Grid>
+								<Grid item md={4} className='grid'><Typography className='text'>Este campo não é obrigatório, mas pode ser preenchido com a marca do produto fornecido, principalmente, para que o solicitante avalie no caso de uma possível substituição. </Typography></Grid>
+
+								<Grid item md={2}><img class='image' src={acoes_lapis}></img></Grid>
+								<Grid item md={4} className='grid'><Typography className='text'>Ao clicar no ícone do “lápis” você terá permissão para alterar os valores informados no produto. </Typography></Grid>
+
+								<Grid item md={2}><img class='image' src={acoes_salvar}></img></Grid>
+								<Grid item md={4} className='grid'>
+									<Typography className='text'>
+										Depois de inserir as informações desejadas, basta clicar no ícone do “disquete” para que o sistema salve as informações na tela e calcule o valor unitário do produto.
+									</Typography>
+									<Typography className='text'>
+										Ao clicar no ícone do “X” os dados inseridos sobre o produto serão desfeitos.
+									</Typography>
+								</Grid>
+							</Grid>
+
+							<Divider />
+
+							<Typography sx={{marginTop: '25px'}} className='text'>No bloco seguinte do formulário, você poderá verificar os itens e as quantidades solicitadas na cotação. Nesta lista, alguns itens poderão apresentar uma quantidade de cotação (QTD COTAÇÃO) igual a zero. Nestes casos, trata-se de uma tomada de preços para atualização de tabelas. </Typography>
+
+							<img class='image' src={resumo}></img>
+
+							<Divider />
+
+							<Grid container sx={{margin: '25px 0'}}>
+								<Grid item md={4}>
+									<Box>
+										<img class='image' src={botao1}></img>
+									</Box>
+								</Grid>
+								<Grid item md={8}>
+									<Typography className='text'>
+										O botão ”Enviar Cotação”, salva toda a cotação que você montou até o momento e envia para o sistema do solicitante, que
+										será atualizado com as informações. Sugerimos que você, durante o processo de cotação e mesmo não tendo a cotação
+										finalizada, acione este botão para que os dados já informados sejam salvos.
+									</Typography>
+									<Typography className='text'>
+										<b>Lembre-se:</b> Enquanto o prazo da cotação estiver aberto, você poderá alterar os dados informados e enviar para o
+										comprador. 
+									</Typography>
+								</Grid>
+							</Grid>
+
+							<Divider />
+
+							<Grid container sx={{marginTop: '25px'}}>
+								<Grid item md={4}>
+									<Box>
+										<img class='image' src={botao2}></img>
+									</Box>
+								</Grid>
+								<Grid item md={8}>
+									<Typography className='text'>
+										Ao clicar em “Recusar cotação”, você informa ao comprador que não tem interesse em participar daquela cotação
+										específica. Isso faz com que o formulário se feche, impossibilitando a participação da sua empresa. Ele será reaberto em
+										uma nova oportunidade de participação.
+									</Typography>
+								</Grid>
+							</Grid>
+
+						</Box>
+					</Box>
+				</Box>
 			</>
 		)
 	}

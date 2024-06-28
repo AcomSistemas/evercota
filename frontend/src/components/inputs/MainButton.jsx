@@ -5,6 +5,7 @@ import { Box, Button, Typography } from "@mui/material";
 class MainButton extends React.Component {
     constructor(props) {
         super(props)
+        this.state = {}
     }
 
     render() {

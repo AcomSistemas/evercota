@@ -1,7 +1,5 @@
 import React, {forwardRef} from 'react';
 
-import _ from 'lodash';
-
 // Icons
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
@@ -9,7 +7,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { Box, Button, Stack, TextField } from '@mui/material';
+import { Box, Button, Stack } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { getNestedProperty } from '../../utils/helpers';
 import { GridRowModes, DataGrid, GridToolbarContainer, GridActionsCellItem, GridRowEditStopReasons, GridEditInputCell } from '@mui/x-data-grid';
@@ -56,6 +54,7 @@ class CurrencyEditInput extends React.Component {
 class EditToolbar extends React.Component {
     constructor(props) {
         super(props)
+        this.state = {}
     }
 
     handleClick = () => {
@@ -297,7 +296,6 @@ class EditableTable extends React.Component {
             event.preventDefault()
             event.stopPropagation()
             const currentField = params.field
-            const currentRowIndex = this.state.rows.findIndex(row => row.id_item === params.id)
             const editableRows = ['qt_embalagem_fornecedor', 'vl_embalagem', 'marca']
             const currentFieldIndex = editableRows.indexOf(currentField)
 
@@ -314,7 +312,6 @@ class EditableTable extends React.Component {
                 }
             } else {
                 // Save the current row and move to the first field of the next row
-                const nextRowIndex = currentRowIndex + 1;
                 this.setState({}, () => this.handleSaveClick2(params.id))
             }
         }
