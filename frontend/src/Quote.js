@@ -436,8 +436,9 @@ class App extends React.Component {
 						{this.state.data ?
 							<>
 								<Box className='company-outcontainer'>
-									<Box className='company-container'>
-										<div className='left-container'>
+									<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '30px', width: '100%', flexDirection: { xs: 'column', lg:'row'} }}>
+
+										<div className="company-container-left">
 											<Box className='navbar-icon'>
 												<Box className='logo'><img src={logo2} alt="Logo"></img></Box>
 											</Box>
@@ -447,14 +448,14 @@ class App extends React.Component {
 												<Typography sx={{ fontSize: '12px' }}>{this.state.data.fantasia}</Typography>
 											</Box>
 										</div>
-										<Box>
-											<Typography sx={{ fontSize: '12px' }}>{this.state.data.nm_usuario ?? ''}</Typography>
-											<Typography sx={{ fontSize: '12px' }}>{this.state.data.email_particular} | {this.state.data.nr_fone ? `+55 ${this.state.data.nr_fone}` : ''}</Typography>
-										</Box>
 
-									</Box>
-									<Box className='company-button-container'>
-										<Button className='help-button' onClick={() => { this.setState({ showPopUp: true }) }}><Typography>Como preencher a cotação</Typography></Button>
+										<div className="company-container-right">
+											<Box>
+												<Typography sx={{ fontSize: '12px' }}>{this.state.data.nm_usuario ?? ''}</Typography>
+												<Typography sx={{ fontSize: '12px', whiteSpace: 'nowrap' }}>{this.state.data.email_particular} | {this.state.data.nr_fone ? `+55 ${this.state.data.nr_fone}` : ''}</Typography>
+											</Box>
+											<Button className='help-button' onClick={() => { this.setState({ showPopUp: true }) }}><Typography>Como preencher a cotação</Typography></Button>
+										</div>
 									</Box>
 								</Box>
 
@@ -717,7 +718,7 @@ class App extends React.Component {
 
 				{this.state.showPopUp &&
 					(
-						<PopUp onClose={()=>{this.setState({showPopUp: false})}} />
+						<PopUp onClose={() => { this.setState({ showPopUp: false }) }} />
 					)}
 			</>
 		)
@@ -733,30 +734,30 @@ class PopUp extends React.Component {
 					<Box className='outer-box'>
 						<Box className='content'>
 							<Box className='header'>
-							<Typography className='title'>Entenda como preencher os campos e enviar a sua cotação</Typography>
+								<Typography className='title'>Entenda como preencher os campos e enviar a sua cotação</Typography>
 
-							<IconButton sx={{ margin: '0 15px 0 20px', backgroundColor: '#fff', height: '45px', width: '45px', borderRadius: '100%' }} onClick={this.props.onClose}>
-								<CloseIcon sx={{ color: '#000', fontSize: '30px' }} />
-							</IconButton>
+								<IconButton sx={{ margin: '0 15px 0 20px', backgroundColor: '#fff', height: '45px', width: '45px', borderRadius: '100%' }} onClick={this.props.onClose}>
+									<CloseIcon sx={{ color: '#000', fontSize: '30px' }} />
+								</IconButton>
 							</Box>
 
-							<Typography sx={{marginTop: '25px'}} className='text'>Este espaço mostra os dados da empresa solicitante da cotação, assim como os dados do comprador responsável.</Typography>
+							<Typography sx={{ marginTop: '25px' }} className='text'>Este espaço mostra os dados da empresa solicitante da cotação, assim como os dados do comprador responsável.</Typography>
 							<img class='image' src={header}></img>
 
 							<Divider />
 
-							<Typography sx={{marginTop: '25px'}} className='text'>Neste espaço você confere os dados de controle da cotação. Fique atento à data e horário limite para enviar sua proposta. Até o encerramento do prazo, você poderá alterar os dados da cotação a qualquer momento.</Typography>
+							<Typography sx={{ marginTop: '25px' }} className='text'>Neste espaço você confere os dados de controle da cotação. Fique atento à data e horário limite para enviar sua proposta. Até o encerramento do prazo, você poderá alterar os dados da cotação a qualquer momento.</Typography>
 							<img class='image' src={inputs}></img>
 
 							<Divider />
 
-							<Typography sx={{marginTop: '25px'}} className='text'>No bloco seguinte do formulário, você poderá verificar os itens e as quantidades solicitadas na cotação. Nesta lista, alguns itens poderão apresentar uma quantidade de cotação (QTD COTAÇÃO) igual a zero. Nestes casos, trata-se de uma tomada de preços para atualização de tabelas. </Typography>
+							<Typography sx={{ marginTop: '25px' }} className='text'>No bloco seguinte do formulário, você poderá verificar os itens e as quantidades solicitadas na cotação. Nesta lista, alguns itens poderão apresentar uma quantidade de cotação (QTD COTAÇÃO) igual a zero. Nestes casos, trata-se de uma tomada de preços para atualização de tabelas. </Typography>
 
 							<img class='image' src={tabela}></img>
 
-							<Typography sx={{marginTop: '25px'}} className='text'>Informe em cada linha da tabela, os dados dos itens os quais deseja incluir na proposta. Se alguns dos itens não forem fornecidos por você, deixe os campos em branco. Veja o que preencher em cada um deles: </Typography>
+							<Typography sx={{ marginTop: '25px' }} className='text'>Informe em cada linha da tabela, os dados dos itens os quais deseja incluir na proposta. Se alguns dos itens não forem fornecidos por você, deixe os campos em branco. Veja o que preencher em cada um deles: </Typography>
 
-							<Grid container columnSpacing={2} rowSpacing={4} sx={{margin: '25px 0'}}>
+							<Grid container columnSpacing={2} rowSpacing={4} sx={{ margin: '25px 0' }}>
 								<Grid item md={2}><img class='image' src={qtd_embalagem}></img></Grid>
 								<Grid item md={4} className='grid'><Typography className='text'>Informe neste campo a quantidade de itens contidos em cada embalagem. Exemplo: 12 se a embalagem for uma caixa com 12 itens.</Typography></Grid>
 
@@ -788,13 +789,13 @@ class PopUp extends React.Component {
 
 							<Divider />
 
-							<Typography sx={{marginTop: '25px'}} className='text'>No bloco seguinte do formulário, você poderá verificar os itens e as quantidades solicitadas na cotação. Nesta lista, alguns itens poderão apresentar uma quantidade de cotação (QTD COTAÇÃO) igual a zero. Nestes casos, trata-se de uma tomada de preços para atualização de tabelas. </Typography>
+							<Typography sx={{ marginTop: '25px' }} className='text'>No bloco seguinte do formulário, você poderá verificar os itens e as quantidades solicitadas na cotação. Nesta lista, alguns itens poderão apresentar uma quantidade de cotação (QTD COTAÇÃO) igual a zero. Nestes casos, trata-se de uma tomada de preços para atualização de tabelas. </Typography>
 
 							<img class='image' src={resumo}></img>
 
 							<Divider />
 
-							<Grid container sx={{margin: '25px 0'}}>
+							<Grid container sx={{ margin: '25px 0' }}>
 								<Grid item md={4}>
 									<Box>
 										<img class='image' src={botao1}></img>
@@ -808,14 +809,14 @@ class PopUp extends React.Component {
 									</Typography>
 									<Typography className='text'>
 										<b>Lembre-se:</b> Enquanto o prazo da cotação estiver aberto, você poderá alterar os dados informados e enviar para o
-										comprador. 
+										comprador.
 									</Typography>
 								</Grid>
 							</Grid>
 
 							<Divider />
 
-							<Grid container sx={{marginTop: '25px'}}>
+							<Grid container sx={{ marginTop: '25px' }}>
 								<Grid item md={4}>
 									<Box>
 										<img class='image' src={botao2}></img>

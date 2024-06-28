@@ -523,7 +523,6 @@ class EditableTable extends React.Component {
         return (
             <Box
                 m={this.props.customMargin ?? '30px 0 0 0'}
-                height={this.state.rows.length <= 100 ? 'auto' : '5270px'}
                 backgroundColor='transparent' // BackgroundColor da EditableTable
             >
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -592,6 +591,9 @@ class EditableTable extends React.Component {
                                     borderRadius: '0 20px 20px 0'
                                 },
                             },
+                            '& .MuiDataGrid-scrollbar': {
+                                display: 'none'
+                            }
                         }}
                     />
                 </LocalizationProvider>
