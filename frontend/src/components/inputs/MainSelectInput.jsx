@@ -33,7 +33,6 @@ class MainSelectInput extends React.Component {
                         : this.props.label ?? ''
                     }
                 </Typography>
-
                 <FormControl className="main-select-input"
                     size={this.props.size ?? 'small'}
                     sx={{

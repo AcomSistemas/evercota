@@ -2,8 +2,8 @@ import axios from 'axios';
 
 export const defaultRequest = async (config, form) => {
     
-    var url = new URL('http://homologacao.acomsistemas.com.br:80/api/' + config.endpoint)
-    // var url = new URL('https://producao.acomsistemas.com.br/api/' + config.endpoint)
+    // var url = new URL('http://homologacao.acomsistemas.com.br:80/api/' + config.endpoint)
+    var url = new URL('https://producao.acomsistemas.com.br/api/' + config.endpoint)
     // var url = new URL('http://webapps01.acom.net.br:8091/' + config.endpoint)
 
     var data = {}
