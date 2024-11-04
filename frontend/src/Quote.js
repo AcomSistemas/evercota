@@ -635,12 +635,13 @@ class App extends React.Component {
 												disabled={!this.state.isValid}
 												onFocus={this.onInputFocus}
 											/>
+
 											<MainSelectInput
 												{...this.props}
 												ref={this.paymentTypeRef}
 												id='cd_condicaovendacompra'
 												value={this.state.data.cd_condicaovendacompra || ''}
-												optionsList={this.state.paymentList.map(value => ({ ...value, label: value.cd_condicaovendacompra.toString() + ' - ' + value.ds_condicaovendacompra, value: value.cd_condicaovendacompra }))}
+												optionsList={this.state.paymentList.map(value => ({ label: value.cd_condicaovendacompra.toString() + ' - ' + value.ds_condicaovendacompra, value: value.cd_condicaovendacompra }))}
 												label='Forma de Pagamento'
 												handleChange={this.handleChangeText}
 												onKeyUp={this.handleKeyUp}
