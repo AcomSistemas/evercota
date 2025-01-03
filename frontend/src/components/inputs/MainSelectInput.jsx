@@ -27,7 +27,7 @@ class MainSelectInput extends React.Component {
     render() {
         return (
             <Box sx={{ width: this.props.width ? this.props.width : '100%' }}>
-                <Typography sx={{ fontSize: '13px' }}>
+                <Typography sx={{ fontSize: '12px' }}>
                     {this.props.required
                         ? <>{this.props.label}<span style={{ color: this.props.colors.redAccent[500] }}> *</span></> ?? ''
                         : this.props.label ?? ''

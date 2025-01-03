@@ -200,7 +200,7 @@ class EditableTable extends React.Component {
                 maxWidth = Math.max(maxWidth, this.getTextWidth(cellValue))
             })
             if (this.props.customRowSize && this.props.customRowSize[column.field]) {
-                maxWidth += this.props.customRowSize[column.field]
+                maxWidth = this.props.customRowSize[column.field]
             }
             return { ...column, minWidth: maxWidth }
         })

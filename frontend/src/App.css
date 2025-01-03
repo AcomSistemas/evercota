@@ -201,7 +201,7 @@ body,
 }
 
 .popup .text {
-	font-size: 16px;
+	font-size: 14px;
 	color: #616161;
 	font-weight: 400;
 }
@@ -231,7 +231,7 @@ body,
 
 /* --------------------------------------------------- MainTextField --------------------------------------------------- */
 .main-text-field .MuiInputBase-root {
-	font-size: 16px;
+	font-size: 14px;
 	/* Tamanho da fonte da label */
 	border-radius: 25px;
 	padding: 0;
@@ -296,7 +296,7 @@ body,
 }
 
 .main-select-input .MuiInputBase-root {
-	font-size: 16px;
+	font-size: 14px;
 	/* Tamanho da fonte da label */
 	border-radius: 25px;
 }
@@ -421,10 +421,14 @@ body,
 	color: var(--grey-1100);
 }
 
+.main-date-input .MuiInputAdornment-root {
+	margin: 0 !important; /* Tira a margem da div onde fica o ícone */
+  }
+
 /* --------------------------------------------------- EditableTable --------------------------------------------------- */
 .editable-table {
 	border: none !important;
-	font-size: 0.80rem !important;
+	font-size: 0.75rem !important;
 }
 
 .editable-table .MuiDataGrid-columnHeader {

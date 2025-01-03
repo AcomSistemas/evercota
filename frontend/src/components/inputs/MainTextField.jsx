@@ -21,7 +21,7 @@ class MainTextField extends React.Component {
     render() {
         return (
             <Box sx={{ width: this.props.width ? this.props.width : '100%' }}>
-                <Typography sx={{ fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography sx={{ fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {this.props.required
                         ? <>{this.props.label}<span style={{ color: this.props.colors.redAccent[600] }}> *</span></> ?? ''
                         : this.props.label ?? ''

@@ -83,10 +83,10 @@ class App extends React.Component {
 				['cd_item', 'SKU Everest'],
 				['ds_item', 'Descrição'],
 				['sg_unidademedida', 'UM'],
-				['qt_cotacao', 'Qtd. Cotação'],
-				['qt_embalagem_fornecedor', 'Qtd. por Embalagem'],
-				['vl_embalagem', 'Valor Embalagem'],
-				['vl_unitario', 'Valor Unitário'],
+				['qt_cotacao', 'Q. Cotação'],
+				['qt_embalagem_fornecedor', 'Q. por Embalagem'],
+				['vl_embalagem', 'V. Embalagem'],
+				['vl_unitario', 'V. Unitário'],
 				['marca_desejada', 'Marca Desejada'],
 				['marca', 'Marca Disponível'],
 			],
@@ -222,6 +222,14 @@ class App extends React.Component {
 				}
 
 				r.data.itens = r.data.itens ? r.data.itens.sort((a, b) => a['id_item'] - b['id_item']) : r.data.itens
+
+				if (r.data.itens && typeof r.data.itens === 'object' && !Array.isArray(r.data.itens)) {
+					r.data.itens = []
+				} else if (!r.data.itens) {
+					r.data.itens = []
+				} else {
+					r.data.itens = r.data.itens.sort((a, b) => a['id_item'] - b['id_item'])
+				}
 
 				this.setState({
 					horario_encerramento: horario_encerramento,
@@ -588,7 +596,8 @@ class App extends React.Component {
 										}
 										customRowSize={
 											{
-												'ds_item': -80,
+												'ds_item': 210,
+												'sg_unidademedida': 70,
 											}
 										}
 									/>
@@ -654,7 +663,7 @@ class App extends React.Component {
 												{...this.props}
 												id='dataItensTotalSize'
 												value={this.state.dataItensTotalSize || ''}
-												label='Qtd. de Itens'
+												label='Q. de Itens'
 												handleChange={this.handleChangeText}
 												onKeyUp={this.handleKeyUp}
 												width='100%'
