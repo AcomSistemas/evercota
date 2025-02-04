@@ -21,6 +21,7 @@ import botao1 from "./data/popup/botao1.png";
 import botao2 from "./data/popup/botao2.png";
 import header from "./data/popup/header.png";
 import inputs from "./data/popup/inputs.png";
+import LoadingGif from "./components/visual/LoadingGif";
 import marca_desejada from "./data/popup/marca_desejada.png";
 import marca_disponivel from "./data/popup/marca_disponivel.png";
 import qtd_embalagem from "./data/popup/qtd_embalagem.png";
@@ -386,7 +387,7 @@ class App extends React.Component {
 	render() {
 		if (this.state.isLoading) {
 			return (
-				<></>
+				<LoadingGif />
 			)
 		}
 		return (

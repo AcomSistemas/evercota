@@ -1,18 +1,17 @@
 import React, { forwardRef } from 'react';
-import dayjs from 'dayjs';
 
 // Icons
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
+import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { Box, Button, Stack, TextField } from '@mui/material';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { Box, IconButton, Stack, Typography } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
 import { getNestedProperty } from '../../utils/helpers';
-import { GridRowModes, DataGrid, GridToolbarContainer, GridActionsCellItem, GridRowEditStopReasons, GridEditInputCell } from '@mui/x-data-grid';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { GridRowModes, DataGrid, GridActionsCellItem, GridRowEditStopReasons, GridEditInputCell } from '@mui/x-data-grid';
 
 
 class TextEditInput extends React.Component {
@@ -91,75 +90,46 @@ class NumberEditInput extends React.Component {
     }
 }
 
-class CustomDatePicker extends React.Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            selectedDate: props.value
-        }
-    }
-
-    handleChange = (newValue) => {
-        this.setState({
-            selectedDate: newValue
-        })
-
-        const { id, field, api } = this.props
-        api.setEditCellValue({ id, field, value: newValue })
-    }
-
+class CustomFooter extends React.Component {
     render() {
-        return (
-            <DatePicker
-                value={this.state.selectedDate}
-                onChange={this.handleChange}
-                renderInput={(params) => <TextField {...params} />}
-                format="DD/MM/YYYY"
-            />
-        )
-    }
-}
+        const { page, totalSize, onPageChange } = this.props
+        const itemsPerPage = 300
 
+        const totalPages = Math.ceil(totalSize / itemsPerPage)
+        const start = (page * itemsPerPage) + 1
+        const end = Math.min(totalSize, (page + 1) * itemsPerPage)
 
-class EditToolbar extends React.Component {
-    constructor(props) {
-        super(props)
-        this.state = {}
-    }
-
-    handleClick = () => {
-        // const id = this.props.randomId()
-        const id = '------'
-
-        let newRow = {}
-
-        this.props.columns.map((value, index) => {
-            if (value[0] !== this.props.rowId) {
-                newRow[value[0]] = ''
-            } else {
-                newRow[value[0]] = id
-            }
-
-        })
-        this.props.setRows([newRow, ...this.props.oldRows], id)
-    }
-
-    render() {
-        if (!this.props.noAddRow) {
+        if (totalSize !== 0) {
             return (
-                <GridToolbarContainer>
-                    <Button sx={{ height: '30px', margin: '5px 0 10px 5px', border: '1px solid #858585', borderRadius: '20px' }} onClick={this.handleClick}>
-                        Adicionar Linha
-                    </Button>
-                </GridToolbarContainer>
+                <Box sx={{ display: 'flex', alignItems: 'center', maxHeight: '30px', padding: '0 30px', borderRadius: '15px', background: this.props.colors.primary[400] }}>
+                    {/* <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <Typography>
+                            Página {page + 1} de {totalPages}
+                        </Typography>
+                        <IconButton
+                            onClick={() => onPageChange(Math.max(0, page - 1))}
+                            disabled={page === 0}
+                        >
+                            <KeyboardArrowLeft />
+                        </IconButton>
+                        <IconButton
+                            onClick={() => onPageChange(Math.min(totalPages - 1, page + 1))}
+                            disabled={page === totalPages - 1}
+                        >
+                            <KeyboardArrowRight />
+                        </IconButton>
+                    </Box> */}
+
+                    <Typography sx={{ marginLeft: 'auto' }}>
+                        {`${start} a ${end} de ${totalSize}`}
+                    </Typography>
+                </Box>
             )
+        } else {
+            return <></>
         }
-        return (
-            <></>
-        )
     }
 }
-
 
 class EditableTable extends React.Component {
     constructor(props) {
@@ -210,10 +180,6 @@ class EditableTable extends React.Component {
         let columns = []
         let keys = this.props.columns
 
-        const formatDate = (value) => {
-            return dayjs(value).format("DD/MM/YYYY")
-        }
-
         keys.map((value, index) => {
             const extraColumnsConfig = this.props.extraColumnsConfig?.[value[0]]
 
@@ -234,16 +200,7 @@ class EditableTable extends React.Component {
             if (this.props.extraColumnsConfig && value[0] in this.props.extraColumnsConfig) {
                 let type = this.props.extraColumnsConfig[value[0]]['type']
 
-                if (type === 'date') {
-                    column['type'] = 'date'
-                    column['valueFormatter'] = (params) => formatDate(params?.value)
-                    column['renderEditCell'] = (params) => <CustomDatePicker {...params} />
-                }
-                else if (type === 'select') {
-                    column['type'] = 'singleSelect'
-                    column['valueOptions'] = this.props.extraColumnsConfig[value[0]]['options']
-                }
-                else if (type === 'number') {
+                if (type === 'number') {
                     column['type'] = 'number'
                     column['align'] = 'right'
                     column['headerAlign'] = 'right'
@@ -273,16 +230,6 @@ class EditableTable extends React.Component {
             columns: this.calculateColumnWidths(columns, this.props.data),
             isLoaded: true
         })
-    }
-
-    generateRandom() {
-        var length = 8,
-            charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-            retVal = ""
-        for (var i = 0, n = charset.length; i < length; ++i) {
-            retVal += charset.charAt(Math.floor(Math.random() * n))
-        }
-        return retVal
     }
 
     getTextWidth(text) {
@@ -532,34 +479,8 @@ class EditableTable extends React.Component {
                         className='editable-table'
                         paginationMode="server"
                         editMode="row"
+                        hideFooterPagination={true}
                         loading={this.props.isLoading}
-                        initialState={{
-                            pagination: { paginationModel: { pageSize: 100, page: 0 } }
-                        }}
-                        slots={{
-                            toolbar: this.props.allowEditOnRow ? EditToolbar : null,
-                            NoRowsOverlay: () => (
-                                <Stack height="100%" alignItems="center" justifyContent="center">
-                                    Nenhum Resultado Encontrado
-                                </Stack>
-                            ),
-                            NoResultsOverlay: () => (
-                                <Stack height="100%" alignItems="center" justifyContent="center">
-                                    Nenhum Resultado Encontrado
-                                </Stack>
-                            )
-                        }}
-                        slotProps={{
-                            toolbar: {
-                                setRows: this.setRows,
-                                randomId: this.generateRandom,
-                                oldRows: this.state.rows,
-                                colors: this.props.colors.custom['secondaryButton'],
-                                columns: this.props.columns,
-                                noAddRow: this.props.noAddRow,
-                                rowId: this.props.rowId
-                            },
-                        }}
                         columns={appendedColumns}
                         rows={this.state.rows}
                         rowCount={this.props.totalSize}
@@ -571,17 +492,27 @@ class EditableTable extends React.Component {
                         onRowEditStop={this.handleRowEditStop}
                         onRowDoubleClick={(params, event) => { this.props.onRowDoubleClick(params.row, event) }}
                         onCellKeyDown={this.handleKeyDown}
-                        onCellClick={(params) => { // envia o params da célula clicada
-                            const isEditable = this.props.editableFields
-                                ? this.props.editableFields.includes(params.field) && !(this.props.extraColumnsConfig?.[params.field]?.disabled)
-                                : !(this.props.extraColumnsConfig?.[params.field]?.disabled)
-
-                            if (isEditable && this.props.onCellClick) {
-                                this.props.onCellClick(params)
-                                this.setState({ selectedCellId: params.id, selectedCellField: params.field })
-                            }
+                        slots={{
+                            NoRowsOverlay: () => (
+                                <Stack height="100%" alignItems="center" justifyContent="center">
+                                    Nenhum Resultado Encontrado
+                                </Stack>
+                            ),
+                            NoResultsOverlay: () => (
+                                <Stack height="100%" alignItems="center" justifyContent="center">
+                                    Nenhum Resultado Encontrado
+                                </Stack>
+                            ),
+                            footer: () => (
+                                <CustomFooter
+                                    {...this.props}
+                                    page={this.state.paginationModel.page}
+                                    totalSize={this.props.totalSize}
+                                    pageSize={this.state.paginationModel.pageSize}
+                                    onPageChange={(newPage) => this.onPageChange({ page: newPage })}
+                                />
+                            )
                         }}
-
                         sx={{
                             '& .MuiDataGrid-columnHeader': {
                                 '&[aria-colindex="1"]': { // borderRadius no cabeçalho da primeira coluna da tabela

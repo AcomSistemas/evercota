@@ -286,7 +286,7 @@ body,
 
 /* --------------------------------------------------- MainSelectInput --------------------------------------------------- */
 .main-select-input .MuiAutocomplete-root .MuiOutlinedInput-root {
-	padding: 1px 0px 1px 10px !important;
+	padding: 4px 0px 1px 10px !important;
 	/*tamanho do autocomplete dentro do FormControl */
 }
 
